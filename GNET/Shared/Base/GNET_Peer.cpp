@@ -49,7 +49,7 @@ int Peer::Startup(int max_connections, unsigned short port, int sleep_time)
 	hostAddr.sin_port = htons(port);
 	hostAddr.sin_addr.S_un.S_addr = htonl(INADDR_ANY);
 	
-	bind(this->socketID, (SOCKADDR*)&hostAddr, sizeof(SOCKADDR));
+	bind(this->socketID, (SOCKADDR*)&hostAddr, sizeof(hostAddr));
 
 	CreateThread(NULL, 0, runRecvThread, this, 0, NULL);
 	CreateThread(NULL, 0, runSendThread, this, 0, NULL);
@@ -145,7 +145,6 @@ int Peer::sendThread(void) {
 		int size = PacketEncoder::EncodePacket( data.pack, buffer, 100 );
 
 		sendto(this->socketID, buffer, size, 0, (SOCKADDR *)&data.sock, sizeof(data.sock));
-
 		send_buffer.Lock();
 	}
 

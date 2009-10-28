@@ -25,12 +25,13 @@ DWORD WINAPI client(LPVOID lp);
 int _tmain(int argc, _TCHAR* argv[])
 {
 	REGISTER_PACKET(MsgPacket);
+	//Peer *gnet;
+	//gnet = new Peer();
+	//gnet->Startup(5,5555,50);
 	CreateThread(NULL, 0, client, NULL, 0, NULL);
-	Peer *gnet;
-	gnet = new Peer();
-	gnet->Startup(5,5555,50);
-	gnet->Recieve();	//iter error
-	d(received\n);
+	//gnet->Recieve();	//iter error
+	//d(received\n);
+	getchar();
 }
 
 DWORD WINAPI client(LPVOID lp)
@@ -54,11 +55,12 @@ DWORD WINAPI client(LPVOID lp)
 		SOCKADDR_IN target;
 		target.sin_addr.S_un.S_addr = inet_addr("127.0.0.1");
 		target.sin_family = AF_INET;
-		target.sin_port = htons(5555);
+		target.sin_port = htons(3333);
 
 		gnet->Send(static_cast<INetPacket*>(&dpack), &target, false);
 		d(sent\n);
 	}
+	getchar();
 	return 1;
 }
 
