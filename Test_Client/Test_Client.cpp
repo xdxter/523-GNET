@@ -52,14 +52,15 @@ DWORD WINAPI client(LPVOID lp)
 
 	//sock_addr
 	SOCKADDR_IN target;
-	target.sin_addr.S_un.S_addr = inet_addr("127.0.1.1");
+	target.sin_addr.S_un.S_addr = inet_addr("10.0.1.6");
 	target.sin_family = AF_INET;
-	target.sin_port = htons(5252);
+	target.sin_port = htons(5555);
 
 	char buffer[10];
-	sendto(gnet->socketID, buffer, 10, 0, (SOCKADDR *)&target, sizeof(SOCKADDR));
+	//sendto(gnet->socketID, buffer, 10, 0, (SOCKADDR *)&target, sizeof(SOCKADDR));
 
-	//gnet->Send(static_cast<INetPacket*>(&dpack), &target, false);
+	gnet->Send(static_cast<INetPacket*>(&dpack), &target, false);
+	d(sent...\n);
 	getchar();
 	return 1;
 }

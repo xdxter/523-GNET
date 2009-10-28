@@ -99,6 +99,7 @@ void Peer::Send(INetPacket *pack, SOCKADDR_IN *remote, bool reliable)
 	Datagram dat;
 	dat.reliable = reliable;
 	dat.sock = new SOCKADDR_IN(*remote);
+	//dat.sock = remote;
 	dat.pack = pack;
 	Send(&dat);
 }
@@ -139,13 +140,13 @@ int Peer::sendThread(void) {
 
 		Datagram data = send_buffer->front();
 		send_buffer->pop();
-
 		send_buffer.Unlock();
 
 		char buffer[100];
+
 		int size = PacketEncoder::EncodePacket( data.pack, buffer, 100 );
 
-		sendto(this->socketID, buffer, size, 0, (SOCKADDR *)&data.sock, sizeof(data.sock));
+		sendto(this->socketID, buffer, size, 0, (SOCKADDR *)data.sock, sizeof(SOCKADDR));
 		printf("really sent...\n");
 		send_buffer.Lock();
 	}
