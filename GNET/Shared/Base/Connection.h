@@ -20,6 +20,7 @@ namespace GNET {
 		int connect_state;
 		clock_t connect_timeout;
 
+
 	public:
 		SOCKADDR_IN remote;
 

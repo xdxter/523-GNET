@@ -46,6 +46,8 @@ namespace GNET {
 
 		ConnectionTable connections;
 
+		Turnkey connecting;
+
 		HANDLE recv_thread;
 		HANDLE send_thread;
 	};

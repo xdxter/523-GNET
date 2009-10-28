@@ -1,9 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GNET_Server", "GNET\Server\Server.vcproj", "{5762A189-BB76-4087-A678-0D91C2D1A51C}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GNET_Client", "GNET\Client\Client.vcproj", "{33BF4F4D-8342-4FBB-A6B9-564250109022}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GNET_Peer", "GNET\Client\Client.vcproj", "{33BF4F4D-8342-4FBB-A6B9-564250109022}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Test_Client", "Test_Client\Test_Client.vcproj", "{782B0626-AE6B-4CD0-A0FF-EA1F294B7020}"
 EndProject
@@ -17,10 +15,6 @@ Global
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{5762A189-BB76-4087-A678-0D91C2D1A51C}.Debug|Win32.ActiveCfg = Debug|Win32
-		{5762A189-BB76-4087-A678-0D91C2D1A51C}.Debug|Win32.Build.0 = Debug|Win32
-		{5762A189-BB76-4087-A678-0D91C2D1A51C}.Release|Win32.ActiveCfg = Release|Win32
-		{5762A189-BB76-4087-A678-0D91C2D1A51C}.Release|Win32.Build.0 = Release|Win32
 		{33BF4F4D-8342-4FBB-A6B9-564250109022}.Debug|Win32.ActiveCfg = Debug|Win32
 		{33BF4F4D-8342-4FBB-A6B9-564250109022}.Debug|Win32.Build.0 = Debug|Win32
 		{33BF4F4D-8342-4FBB-A6B9-564250109022}.Release|Win32.ActiveCfg = Release|Win32

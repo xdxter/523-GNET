@@ -209,12 +209,20 @@
 					RelativePath="..\Shared\Base\Monitor.h"
 					>
 				</File>
+				<File
+					RelativePath=".\Turnkey.h"
+					>
+				</File>
 			</Filter>
 		</Filter>
 		<Filter
 			Name="Client"
 			>
 		</Filter>
+		<File
+			RelativePath=".\Using_GNET.txt"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>

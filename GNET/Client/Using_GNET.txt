@@ -1,0 +1,14 @@
+When setting up a project, you must:
+
+1.	In the project properties, go to Common Properties, and 
+	add the GNET_Peer project.
+
+2.	In Configuration Properties > C/C++ > General, add 
+	Additional Include Directories: 
+	$(OutDir);../GNET/Client;../GNET/Shared/Base/
+
+	$(OutDir) should be the directory that contains 
+	GNET_Peer.lib
+
+3.	In Configureation Properties > Linker > Input, 
+	add the Additional Dependency: wsock32.lib
