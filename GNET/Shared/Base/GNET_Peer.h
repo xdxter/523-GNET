@@ -28,6 +28,7 @@ namespace GNET {
 		int recvThread(void);
 		int sendThread(void);
 		int logcThread(void);
+		SOCKET socketID;
 
 	protected:
 		friend class Connection;		
@@ -37,7 +38,6 @@ namespace GNET {
 		int max_clients;
 		int sleep_time;
 
-		SOCKET socketID;
 
 		Monitor<DgramBuffer> send_buffer;
 		Monitor<DgramBuffer> recv_buffer;

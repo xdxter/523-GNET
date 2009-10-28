@@ -49,7 +49,7 @@ int Peer::Startup(int max_connections, unsigned short port, int sleep_time)
 	hostAddr.sin_port = htons(port);
 	hostAddr.sin_addr.S_un.S_addr = htonl(INADDR_ANY);
 	
-	bind(this->socketID, (SOCKADDR*)&hostAddr, sizeof(hostAddr));
+	bind(this->socketID, (SOCKADDR*)&hostAddr, sizeof(SOCKADDR));
 
 	CreateThread(NULL, 0, runRecvThread, this, 0, NULL);
 	CreateThread(NULL, 0, runSendThread, this, 0, NULL);
@@ -98,7 +98,7 @@ void Peer::Send(INetPacket *pack, SOCKADDR_IN *remote, bool reliable)
 {	
 	Datagram dat;
 	dat.reliable = reliable;
-	dat.sock = remote;
+	dat.sock = new SOCKADDR_IN(*remote);
 	dat.pack = pack;
 	Send(&dat);
 }
@@ -115,8 +115,9 @@ int Peer::recvThread(void) {
 	SOCKADDR remote;
 	int len = sizeof(SOCKADDR);
 	while (true) {
+		printf("Calling recvFrom....\n");
 		int recv = recvfrom(this->socketID, buff, 1024, 0, &remote, &len);
-		
+		printf("Received....\n");
 		INetPacket* packet = PacketEncoder::DecodePacket(buff);
 		Datagram dat;
 		SOCKADDR_IN *sock = new SOCKADDR_IN( *((SOCKADDR_IN*)&remote));
@@ -145,6 +146,7 @@ int Peer::sendThread(void) {
 		int size = PacketEncoder::EncodePacket( data.pack, buffer, 100 );
 
 		sendto(this->socketID, buffer, size, 0, (SOCKADDR *)&data.sock, sizeof(data.sock));
+		printf("really sent...\n");
 		send_buffer.Lock();
 	}
 

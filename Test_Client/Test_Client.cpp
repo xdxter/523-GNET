@@ -25,10 +25,10 @@ DWORD WINAPI client(LPVOID lp);
 int _tmain(int argc, _TCHAR* argv[])
 {
 	REGISTER_PACKET(MsgPacket);
+	CreateThread(NULL, 0, client, NULL, 0, NULL);
 	//Peer *gnet;
 	//gnet = new Peer();
 	//gnet->Startup(5,5555,50);
-	CreateThread(NULL, 0, client, NULL, 0, NULL);
 	//gnet->Recieve();	//iter error
 	//d(received\n);
 	getchar();
@@ -41,25 +41,25 @@ DWORD WINAPI client(LPVOID lp)
 	MsgPacket msg;
 	strcpy(msg.msg, "This is a message.\n");
 
-	bool is_client = true;
-	if (is_client) {
-		gnet = new Peer();
-		gnet->Startup(5, 3333, 50);
-		//gnet->Connect("127.0.0.1", 5555, 7, 500);
-		//Datapack
-		DataPack dpack;
-		dpack.seq_num=100;
-		dpack.game = static_cast<IGamePacket*>(&msg);
+	//GNET startup
+	gnet = new Peer();
+	gnet->Startup(5, 3333, 50);
 
-		//sock_addr
-		SOCKADDR_IN target;
-		target.sin_addr.S_un.S_addr = inet_addr("127.0.0.1");
-		target.sin_family = AF_INET;
-		target.sin_port = htons(3333);
+	//Datapack
+	DataPack dpack;
+	dpack.seq_num=100;
+	dpack.game = static_cast<IGamePacket*>(&msg);
 
-		gnet->Send(static_cast<INetPacket*>(&dpack), &target, false);
-		d(sent\n);
-	}
+	//sock_addr
+	SOCKADDR_IN target;
+	target.sin_addr.S_un.S_addr = inet_addr("127.0.1.1");
+	target.sin_family = AF_INET;
+	target.sin_port = htons(5252);
+
+	char buffer[10];
+	sendto(gnet->socketID, buffer, 10, 0, (SOCKADDR *)&target, sizeof(SOCKADDR));
+
+	//gnet->Send(static_cast<INetPacket*>(&dpack), &target, false);
 	getchar();
 	return 1;
 }
