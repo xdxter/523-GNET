@@ -32,19 +32,31 @@ void Connection::Handshake(int i) {
 
 void Connection::Update() {
 	// if timed out, send again!
-	if (connect_state != CONNECTED && clock() > connect_timeout)  
+	if (connect_state != CONNECTED && connect_state != NOT_CONNECTED && clock() > connect_timeout)  
 		Handshake(connect_state); 
 
-
-	
-
-
-	// do RUDP stuff.
+	// Run down RUDP timers, send ACK1's
 }
 
 void Connection::HandlePacket(Datagram *data) {
+	// Connection Protocol Stuff
+	if (connect_state == WAITING_FOR_ACK) {
+		if (dynamic_cast<ConPack*>(data->pack))
+			Handshake(2);
+		if (dynamic_cast<AckPack*>(data->pack)) 
+			connect_state = CONNECTED;
+	}
+	
+	if (dynamic_cast<SynPack*>(data->pack)) {
+		Handshake(3);
+		connect_state = CONNECTED;
+	}
 
-	// write connection protocol handling code here
+	// RUDP stuff
+	if (data->reliable) {
+		// if it's an ACK2, we finished something
+		// otherwise, we need to send an ACK1...
+	}	
 }
 
 int Connection::Seq_Num() {
