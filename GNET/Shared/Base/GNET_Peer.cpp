@@ -81,6 +81,7 @@ int Peer::ListenForConnection(int max_clients) {
 
 DataPack* Peer::Recieve() {
 	game_recv_buffer.Lock();
+	game_recv_buffer.Wait();
 	INetPacket *ret = &(game_recv_buffer->front());
 	
 	if (dynamic_cast<DataPack*>(ret)) {
@@ -165,6 +166,7 @@ int Peer::logcThread(void) {
 		if (dynamic_cast<DataPack*>(data.pack)) {
 			game_recv_buffer.Lock();
 			game_recv_buffer->push(*(static_cast<DataPack*>(data.pack)));
+			game_recv_buffer.Pulse();
 			game_recv_buffer.Unlock();
 		}
 

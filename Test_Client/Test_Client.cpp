@@ -7,6 +7,12 @@
 #include "GNET_Packet.h"
 #include "GNET_Peer.h"
 
+#define __debug__ __tool__
+#define d(x) printf(#x);
+#define dd(x, fmt) printf("=====DEBUG====> Line %u: %s=" "%" #fmt "\n" , __LINE__, #x, x)
+#define ddd(extra, x, fmt) printf(#extra "     =====DEBUG====> Line %u: %s=" "%" #fmt "\n" , __LINE__, #x, x)
+#define dddd() printf("*************DEBUG*************\n")
+
 #pragma pack(push,1)
 struct MsgPacket : GNET::IGamePacket {
 	char msg[20];
@@ -23,7 +29,8 @@ int _tmain(int argc, _TCHAR* argv[])
 	Peer *gnet;
 	gnet = new Peer();
 	gnet->Startup(5,5555,50);
-	//gnet->Recieve();	//iter error
+	gnet->Recieve();	//iter error
+	d(received\n);
 }
 
 DWORD WINAPI client(LPVOID lp)
@@ -37,10 +44,20 @@ DWORD WINAPI client(LPVOID lp)
 	if (is_client) {
 		gnet = new Peer();
 		gnet->Startup(5, 3333, 50);
-		gnet->Connect("127.0.0.1", 5555, 5, 500);
-		DataPack data;
-		data.seq_num=100;
-		data.game = static_cast<IGamePacket*>(&msg);
+		//gnet->Connect("127.0.0.1", 5555, 7, 500);
+		//Datapack
+		DataPack dpack;
+		dpack.seq_num=100;
+		dpack.game = static_cast<IGamePacket*>(&msg);
+
+		//sock_addr
+		SOCKADDR_IN target;
+		target.sin_addr.S_un.S_addr = inet_addr("127.0.0.1");
+		target.sin_family = AF_INET;
+		target.sin_port = htons(5555);
+
+		gnet->Send(static_cast<INetPacket*>(&dpack), &target, false);
+		d(sent\n);
 	}
 	return 1;
 }
