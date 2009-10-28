@@ -21,7 +21,7 @@ public:
 
 template <class T> Monitor<T>::Monitor() {
 	mutex = CreateMutex(NULL, false, NULL);
-	control_semaphore = CreateSemaphore(NULL, 0, 1, NULL);
+	control_semaphore = CreateSemaphore(NULL, 0, 1000, NULL);
 }
 
 template<class T> Monitor<T>::~Monitor() {
