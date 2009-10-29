@@ -1,5 +1,5 @@
 #include "GNET_Types.h"
-#include <time.h>
+#include "Timer.h"
 
 #pragma once
 	
@@ -22,7 +22,7 @@ namespace GNET {
 		int seq_num_out;
 	
 		int connect_state;
-		clock_t connect_timeout;
+		Timer connect_timer;
 
 		bool is_instigator;
 		int attempts;

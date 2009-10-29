@@ -2,6 +2,7 @@
 #include <map>
 #include "winsock2.h"
 #include "GNET_Peer.h"
+#include "Timer.h"
 
 #define MAX_PACKETSIZE 16
 
@@ -83,7 +84,7 @@ int Peer::ListenForConnection(int max_clients) {
 	return 1;
 }
 
-Datagram* Peer::Recieve(bool block) {
+Datagram* Peer::Receive(bool block) {
 	game_recv_buffer.Lock();
 	if (block) {
 		game_recv_buffer.Wait();
@@ -165,10 +166,11 @@ int Peer::sendThread(void) {
 }
 
 int Peer::logcThread(void) {
-
+	Timer pacing(500);
 	ConnectionTable::iterator it;
 
 	while (true) {
+		pacing.Reset();
 		recv_buffer.Lock();
 		if(recv_buffer->size() >0)
 		{
@@ -202,6 +204,7 @@ int Peer::logcThread(void) {
 		for (it = connections.begin(); it != connections.end(); it++) {
 			it->second->Update();
 		}
+		pacing.WaitTillFinished();
 	}
 
 	return 0;

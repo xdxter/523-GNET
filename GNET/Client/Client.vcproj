@@ -185,6 +185,10 @@
 					RelativePath="..\Shared\Base\Packet.cpp"
 					>
 				</File>
+				<File
+					RelativePath="..\Shared\Base\Timer.cpp"
+					>
+				</File>
 			</Filter>
 			<Filter
 				Name="Base"
@@ -207,6 +211,10 @@
 				</File>
 				<File
 					RelativePath="..\Shared\Base\Monitor.h"
+					>
+				</File>
+				<File
+					RelativePath="..\Shared\Base\Timer.h"
 					>
 				</File>
 				<File
