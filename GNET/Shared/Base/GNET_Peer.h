@@ -2,6 +2,7 @@
 #include "GNET_Types.h"
 #include "Connection.h"
 #include "Monitor.h"
+#include "Turnkey.h"
 
 #pragma once
 
@@ -30,7 +31,9 @@ namespace GNET {
 		int logcThread(void);
 		SOCKET socketID;
 
-	protected:
+	protected:		
+		Turnkey<bool> connecting;
+
 		friend class Connection;		
 		void Send(Datagram *dat);
 	private:
@@ -45,6 +48,7 @@ namespace GNET {
 		Monitor<DataBuffer> game_recv_buffer;
 
 		ConnectionTable connections;
+
 
 		HANDLE recv_thread;
 		HANDLE send_thread;

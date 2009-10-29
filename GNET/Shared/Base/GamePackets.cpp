@@ -6,11 +6,13 @@ using namespace GNET;
 
 PktRegMap GNET::g_GamePackets;
 
+
 DataPack* GNET::CreateDataPack(IGamePacket* packet) {
 	DataPack* data = new DataPack();
 	PktReg *reg = &g_GamePackets[ packet->GetType() ];
 	data->game = static_cast<IGamePacket*>(reg->instantiate());
 	memcpy(data->game, packet, reg->size );
+
 
 	return data;
 }

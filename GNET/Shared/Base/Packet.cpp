@@ -1,6 +1,7 @@
 #include <map>
 #include <queue>
 #include "GNET_Types.h"
+#include "GNET_Packet.h"
 
 using namespace GNET; 
 

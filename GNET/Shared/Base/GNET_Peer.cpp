@@ -68,10 +68,12 @@ int Peer::Connect(char* ip, unsigned short port, unsigned int max_attempts, unsi
 		return 0;
 
 	Connection* c = new Connection(remote, this);
-	c->TryConnect();
-
 	connections.insert( std::pair< ulus, Connection*>( ADDR(remote), c ) );
-	return 1;
+	c->TryConnecting(max_attempts, delay);
+
+	connecting.Wait();
+
+	return connecting.GetResult();
 }
 
 int Peer::ListenForConnection(int max_clients) {

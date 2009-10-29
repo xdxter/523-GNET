@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="GNET_Peer"
-	ProjectGUID="{33BF4F4D-8342-4FBB-A6B9-564250109022}"
-	RootNamespace="Client"
+	Name="test"
+	ProjectGUID="{08E3FA69-C3EC-4EA0-9793-DFF8C3F7F8C2}"
+	RootNamespace="test"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="196613"
 	>
@@ -19,11 +19,9 @@
 		<Configuration
 			Name="Debug|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
-			IntermediateDirectory="$(SolutionDir)$(ConfigurationName)\Intermediate"
-			ConfigurationType="4"
-			UseOfMFC="0"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="1"
 			CharacterSet="1"
-			ManagedExtensions="0"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -43,14 +41,13 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(OutDir)&quot;;../Shared/Base/;../Shared/"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;"
-				MinimalRebuild="false"
-				BasicRuntimeChecks="0"
-				RuntimeLibrary="2"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
+				MinimalRebuild="true"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="3"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				DebugInformationFormat="3"
+				DebugInformationFormat="4"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -62,10 +59,17 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLibrarianTool"
+				Name="VCLinkerTool"
+				LinkIncremental="2"
+				GenerateDebugInformation="true"
+				SubSystem="1"
+				TargetMachine="1"
 			/>
 			<Tool
 				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -77,6 +81,9 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -84,7 +91,7 @@
 			Name="Release|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="2"
+			ConfigurationType="1"
 			CharacterSet="1"
 			WholeProgramOptimization="1"
 			>
@@ -107,7 +114,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;CLIENT_EXPORTS"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
@@ -126,9 +133,8 @@
 			<Tool
 				Name="VCLinkerTool"
 				LinkIncremental="1"
-				ModuleDefinitionFile="dll_export.def"
 				GenerateDebugInformation="true"
-				SubSystem="2"
+				SubSystem="1"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				TargetMachine="1"
@@ -160,67 +166,41 @@
 	</References>
 	<Files>
 		<Filter
-			Name="Shared"
+			Name="Source Files"
+			Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
+			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\Shared\Base\Connection.cpp"
+				RelativePath=".\stdafx.cpp"
 				>
 			</File>
-			<Filter
-				Name="Packets"
+			<File
+				RelativePath=".\test.cpp"
 				>
-				<File
-					RelativePath="..\Shared\Base\GamePackets.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\Shared\Base\GNET_GamePacket.h"
-					>
-				</File>
-				<File
-					RelativePath="..\Shared\Base\GNET_Packet.h"
-					>
-				</File>
-				<File
-					RelativePath="..\Shared\Base\Packet.cpp"
-					>
-				</File>
-			</Filter>
-			<Filter
-				Name="Base"
-				>
-				<File
-					RelativePath="..\Shared\Base\Connection.h"
-					>
-				</File>
-				<File
-					RelativePath="..\Shared\Base\GNET_Peer.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\Shared\Base\GNET_Peer.h"
-					>
-				</File>
-				<File
-					RelativePath="..\Shared\Base\GNET_Types.h"
-					>
-				</File>
-				<File
-					RelativePath="..\Shared\Base\Monitor.h"
-					>
-				</File>
-				<File
-					RelativePath="..\Shared\Base\Turnkey.h"
-					>
-				</File>
-			</Filter>
+			</File>
 		</Filter>
 		<Filter
-			Name="Client"
+			Name="Header Files"
+			Filter="h;hpp;hxx;hm;inl;inc;xsd"
+			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
+			>
+			<File
+				RelativePath=".\stdafx.h"
+				>
+			</File>
+			<File
+				RelativePath=".\targetver.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Resource Files"
+			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
+			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
 		</Filter>
 		<File
-			RelativePath=".\Using_GNET.txt"
+			RelativePath=".\ReadMe.txt"
 			>
 		</File>
 	</Files>

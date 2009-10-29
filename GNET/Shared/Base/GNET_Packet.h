@@ -10,12 +10,12 @@ namespace GNET {
 		int size;
 		void* (*instantiate) (void);
 	};
-	typedef std::map<int,PktReg> PktRegMap;
-	typedef std::pair<int,PktReg> PktRegPair;
+	typedef std::map<int,GNET::PktReg> PktRegMap;
+	typedef std::pair<int,GNET::PktReg> PktRegPair;
 	extern PktRegMap g_NetPackets;
 
 	#define REGISTER_PACKET(T,MAP)	{							\
-		PktReg pkt_data; T t;	     							\
+		GNET::PktReg pkt_data; T t;								\
 		pkt_data.size = sizeof(T);								\
 		pkt_data.instantiate = t.Instantiate;					\
 		MAP.insert(	PktRegPair(t.GetType(), pkt_data)); }
