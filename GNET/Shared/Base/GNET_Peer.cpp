@@ -60,7 +60,7 @@ int Peer::Startup(int max_connections, unsigned short port, int sleep_time)
 	return 0;
 }
 
-int Peer::Connect(char* ip, unsigned short port, unsigned int max_attempts, unsigned int delay) {		
+int Peer::Connect(char* ip, unsigned short port, unsigned int max_attempts, unsigned int timeout_ms) {		
 	SOCKADDR_IN remote;
 	remote.sin_family = AF_INET;
 	remote.sin_port = htons(port);
@@ -71,16 +71,16 @@ int Peer::Connect(char* ip, unsigned short port, unsigned int max_attempts, unsi
 
 	Connection* c = new Connection(remote, this);
 	connections.insert( std::pair< ulus, Connection*>( ADDR(remote), c ) );
-	c->TryConnecting(max_attempts, delay);
+	c->TryConnecting(max_attempts, timeout_ms);
 
 	connecting.Wait();
 
 	return connecting.GetResult();
 }
 
-int Peer::ListenForConnection(int max_clients) {
+int Peer::ListenForConnection(int max_clients, unsigned int timeout_ms) {
 	this->max_clients = max_clients;
-
+	this->connect_timeout = timeout_ms;
 	return 1;
 }
 

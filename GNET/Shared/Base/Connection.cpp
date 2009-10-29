@@ -14,7 +14,8 @@ enum {
 	SEND_CON,
 	SEND_SYN,
 	SEND_ACK
-}
+};
+
 Connection::Connection(SOCKADDR_IN remote, Peer* peer) {
 	this->remote = remote;
 	this->peer = peer;
@@ -22,6 +23,8 @@ Connection::Connection(SOCKADDR_IN remote, Peer* peer) {
 
 	is_instigator = false;
 	connect_state = NOT_CONNECTED;
+
+	ms_delay = peer->connect_timeout;
 }
 
 void Connection::TryConnecting(int max_attempts, int ms_delay) {
@@ -40,11 +43,6 @@ void Connection::Handshake(int i) {
 		(i == SEND_SYN? (INetPacket*) new SynPack :
 							   new AckPack)),
 		&remote,false);
-
-	printf("Sending %s packet\n",
-		(i == 1?"ConPack" :
-		(i == 2? "SynPack" :
-				 "AckPack")));
 	// Set to wait for Syn
 	connect_timer.Reset(ms_delay);
 }
@@ -72,12 +70,10 @@ void Connection::Update() {
 bool Connection::HandlePacket(Datagram *data) {
 	if (is_instigator) {
 		if (dynamic_cast<SynPack*>(data->pack)) {
-			printf("Received SynPack\n");
 			if (connect_state == WAITING_FOR_SYN) {
 				peer->connecting.SetResult(true);
 				peer->connecting.Pulse();
 				connect_state = CONNECTED;
-				is_connecting = false;
 			}
 			Handshake(SEND_ACK);
 			return true;
@@ -85,17 +81,14 @@ bool Connection::HandlePacket(Datagram *data) {
 	}
 	if (!is_instigator) {
 		if (dynamic_cast<ConPack*>(data->pack)) {
-			printf("Received ConPack\n");
 			Handshake(SEND_SYN);
 			if (connect_state == NOT_CONNECTED)
 				connect_state = WAITING_FOR_ACK;			
 			return true;
 		}
 		if (dynamic_cast<AckPack*>(data->pack)) {
-			printf("Received AckPack\n");
 			if (connect_state == WAITING_FOR_ACK) {
-				connect_state = CONNECTED;
-				is_connecting = false;				
+				connect_state = CONNECTED;		
 			}
 			return true;
 		}
