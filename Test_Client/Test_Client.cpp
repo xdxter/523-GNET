@@ -43,8 +43,8 @@ int _tmain(int argc, _TCHAR* argv[])
 	int flag = 0;
 	flag = gnet->Connect("10.0.1.6", 4444,50);
 	getchar();
-	Datagram * p = gnet->Recieve(true);
-	dd(static_cast<MsgPacket*>(static_cast<DataPack*>(p->pack)->game)->msg, s);
+	DataPack * p = gnet->Receive(true);
+	dd(static_cast<MsgPacket*>(p->game)->msg, s);
 	getchar();
 	return 1;
 }
