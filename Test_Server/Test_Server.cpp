@@ -24,11 +24,18 @@ using namespace GNET;
 
 int _tmain(int argc, _TCHAR* argv[])
 {
-	REGISTER_PACKET(MsgPacket);
+	REGISTER_PACKET(MsgPacket, GNET::g_GamePackets);
 	Peer *gnet;
 	gnet = new Peer();
 	gnet->Startup(5,5555,50);
-	getchar();
+	gnet->ListenForConnection(0);
+
+	while (true) {
+		DataPack *dat = gnet->Recieve(true);
+		if (dat)
+			ddd("Recieved message:",dynamic_cast<MsgPacket*>(dat->game)->msg,s);
+	}
+	
 	return 0;
 }
 

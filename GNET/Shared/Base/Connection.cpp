@@ -34,6 +34,10 @@ void Connection::Handshake(int i) {
 							   new AckPack)),
 		&remote,false);
 
+	printf("Sending %s packet\n",
+		(i == 1?"ConPack" :
+		(i == 2? "SynPack" :
+							   "AckPack")));
 	// Set to wait for Syn
 	connect_timeout = clock() + (int)(CLOCKS_PER_SEC * ((float)ms_delay / 1000.0f));
 }
@@ -56,17 +60,20 @@ void Connection::Update() {
 void Connection::HandlePacket(Datagram *data) {
 	if (!is_instigator) {
 		if (dynamic_cast<ConPack*>(data->pack)) {
+			printf("Recieved ConPack\n");
 			Handshake(2);
 			if (connect_state == NOT_CONNECTED)
 				connect_state = WAITING_FOR_ACK;
 		}
 		if (dynamic_cast<AckPack*>(data->pack)) {
+			printf("Recieved AckPack\n");
 			if (connect_state == WAITING_FOR_ACK)
 				connect_state = CONNECTED;
 		}
 	}
 	if (is_instigator) {
 		if (dynamic_cast<SynPack*>(data->pack)) {
+			printf("Recieved SynPack\n");
 			if (connect_state == WAITING_FOR_SYN) {
 				peer->connecting.SetResult(true);
 				peer->connecting.Pulse();

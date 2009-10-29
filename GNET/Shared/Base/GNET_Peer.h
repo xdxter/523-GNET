@@ -9,6 +9,7 @@
 namespace GNET {
 #define ADDR( sa ) ulus( (sa).sin_addr.S_un.S_addr, (sa).sin_port)
 	typedef std::pair<unsigned long, unsigned short> ulus;
+	typedef std::pair<ulus, Connection*> ConnectionTablePair;
 	typedef std::map<ulus, Connection* > ConnectionTable;
 	typedef std::queue<DataPack> DataBuffer;
 	typedef std::queue<Datagram> DgramBuffer;
@@ -23,7 +24,7 @@ namespace GNET {
 		int Connect(char* ip, unsigned short port, unsigned int max_attempts = 7, unsigned int delay = 500);
 		int ListenForConnection(int max_clients = 1);
 
-		DataPack* Recieve();
+		DataPack* Recieve(bool should_block);
 		void Send(INetPacket *pack, SOCKADDR_IN *remote, bool reliable = false);
 
 		int recvThread(void);

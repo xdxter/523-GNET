@@ -54,6 +54,7 @@ int Peer::Startup(int max_connections, unsigned short port, int sleep_time)
 
 	CreateThread(NULL, 0, runRecvThread, this, 0, NULL);
 	CreateThread(NULL, 0, runSendThread, this, 0, NULL);
+	CreateThread(NULL, 0, runLogcThread, this, 0, NULL);
 
 	return 0;
 }
@@ -82,9 +83,15 @@ int Peer::ListenForConnection(int max_clients) {
 	return 1;
 }
 
-DataPack* Peer::Recieve() {
+DataPack* Peer::Recieve(bool block) {
 	game_recv_buffer.Lock();
-	game_recv_buffer.Wait();
+	if (block) {
+		game_recv_buffer.Wait();
+	} else {
+		// Decrement the semaphore without blocking.
+		if (! game_recv_buffer->empty())
+			game_recv_buffer.Wait();
+	}
 	INetPacket *ret = &(game_recv_buffer->front());
 	
 	if (dynamic_cast<DataPack*>(ret)) {
@@ -179,6 +186,12 @@ int Peer::logcThread(void) {
 		ConnectionTable::iterator it;
 		if (( it = connections.find( ADDR( *data.sock) )) != connections.end())
 			it->second->HandlePacket(&data);
+		else if (dynamic_cast<ConPack*>(data.pack)) {
+			std::pair<ConnectionTable::iterator,bool> it_pair = 
+				connections.insert( ConnectionTablePair( ADDR(*data.sock), new Connection(*data.sock, this)));
+			it = it_pair.first;
+			it->second->HandlePacket(&data);
+		}
 
 		recv_buffer.Lock();
 	}
