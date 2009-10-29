@@ -14,5 +14,6 @@ namespace GNET {
 		void Timer::Reset(int ms_time);		
 		void WaitTillFinished();
 		bool Timer::Finished();
+		void Stop();
 	};
 }

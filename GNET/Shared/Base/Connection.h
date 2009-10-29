@@ -25,7 +25,6 @@ namespace GNET {
 		Timer connect_timer;
 
 		bool is_instigator;
-		bool is_connecting;
 		int attempts;
 		int ms_delay;
 

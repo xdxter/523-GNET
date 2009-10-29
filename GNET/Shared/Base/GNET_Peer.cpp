@@ -127,7 +127,6 @@ int Peer::recvThread(void) {
 	SOCKADDR remote;
 	int len = sizeof(SOCKADDR);
 	while (true) {
-		printf("Calling recvFrom....\n");
 		int recv = recvfrom(this->socketID, buff, 1024, 0, &remote, &len);
 		printf("Received....\n");
 		INetPacket* packet = PacketEncoder::DecodePacket(buff);
