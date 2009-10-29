@@ -6,8 +6,6 @@
 
 #pragma once
 
-#define NEVER_STOP -1
-
 namespace GNET {
 #define ADDR( sa ) ulus( (sa).sin_addr.S_un.S_addr, (sa).sin_port)
 	typedef std::pair<unsigned long, unsigned short> ulus;
@@ -22,7 +20,7 @@ namespace GNET {
 		Peer();
 		virtual ~Peer();
 
-		int Peer::Startup(int max_connections, unsigned short port, int sleep_time = NEVER_STOP);
+		int Peer::Startup(int max_connections, unsigned short port, int sleep_time = 20);
 		int Connect(char* ip, unsigned short port, unsigned int max_attempts = 7, unsigned int delay = 500);
 		int ListenForConnection(int max_clients = 1, unsigned int timeout_ms = 500);
 

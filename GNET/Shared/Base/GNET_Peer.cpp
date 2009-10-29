@@ -170,8 +170,9 @@ int Peer::logcThread(void) {
 
 	while (true) {
 		pacing.Reset();
+
 		recv_buffer.Lock();
-		if(recv_buffer->size() >0)
+		while (recv_buffer->size() >0)
 		{
 			recv_buffer.Wait();
 
@@ -196,9 +197,10 @@ int Peer::logcThread(void) {
 				it = it_pair.first;
 				it->second->HandlePacket(&data);
 			}
+
+			recv_buffer.Lock();
 		}
-		else
-			recv_buffer.Unlock();
+		recv_buffer.Unlock();
 
 		for (it = connections.begin(); it != connections.end(); it++) {
 			it->second->Update();
