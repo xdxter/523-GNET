@@ -72,7 +72,7 @@ int Peer::Connect(char* ip, unsigned short port, unsigned int max_attempts, unsi
 
 	connecting.Wait();
 
-	return c->connect_state == CONNECTED;
+	return connecting.GetResult();
 }
 
 int Peer::ListenForConnection(int max_clients) {

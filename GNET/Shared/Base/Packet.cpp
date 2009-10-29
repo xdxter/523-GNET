@@ -2,6 +2,7 @@
 #include <queue>
 #include "GNET_Types.h"
 
+PktRegMap g_NetPackets;
 
 int copyin(char* buff, int offset, char* pack, int size, int parentsize);
 int copyout(char* buff, int offset, char* pack, int size, int parentsize);
