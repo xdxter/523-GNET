@@ -13,6 +13,7 @@ DWORD WINAPI runLogcThread(void* param) { return ((Peer*)param)->logcThread(); }
 
 Peer::Peer()
 {	
+	PacketEncoder::RegisterNetPackets();
 }
 
 Peer::~Peer() 
@@ -99,9 +100,9 @@ void Peer::Send(INetPacket *pack, SOCKADDR_IN *remote, bool reliable)
 	Datagram dat;
 	dat.reliable = reliable;
 	dat.sock = new SOCKADDR_IN(*remote);
-	memcpy(dat.pack, pack, sizeof(*pack));
-	//dat.pack = new INetPacket(*pack);
-	//dat.pack = pack;
+	INetPacket* net = static_cast<INetPacket*>(g_NetPackets[ pack->GetType() ].instantiate());
+	memcpy(net,pack, g_NetPackets[pack->GetType()].size);
+	dat.pack = net;
 	Send(&dat);
 }
 void Peer::Send(Datagram *dat) 

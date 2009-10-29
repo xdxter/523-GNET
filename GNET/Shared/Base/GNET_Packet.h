@@ -15,7 +15,7 @@ namespace GNET {
 	extern PktRegMap g_NetPackets;
 
 	#define REGISTER_PACKET(T,MAP)	{							\
-		GNET::PktReg pkt_data; T t;								\
+		PktReg pkt_data; T t;	     							\
 		pkt_data.size = sizeof(T);								\
 		pkt_data.instantiate = t.Instantiate;					\
 		MAP.insert(	PktRegPair(t.GetType(), pkt_data)); }

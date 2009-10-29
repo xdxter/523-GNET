@@ -25,7 +25,7 @@ DWORD WINAPI client(LPVOID lp);
 
 int _tmain(int argc, _TCHAR* argv[])
 {
-	REGISTER_PACKET(MsgPacket);
+	REGISTER_PACKET(MsgPacket, GNET::g_GamePackets);
 	CreateThread(NULL, 0, client, NULL, 0, NULL);
 	//Peer *gnet;
 	//gnet = new Peer();
@@ -64,7 +64,6 @@ DWORD WINAPI client(LPVOID lp)
 
 	gnet->Send(CreateDataPack(&msg), &target, false);
 	d(sent...\n);
-	getchar();
 	return 1;
 }
 

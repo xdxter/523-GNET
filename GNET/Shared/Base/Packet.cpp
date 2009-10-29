@@ -4,7 +4,7 @@
 
 using namespace GNET; 
 
-PktRegMap g_NetPackets;
+PktRegMap GNET::g_NetPackets;
 int copyin(char* buff, int offset, char* pack, int size, int parentsize);
 int copyout(char* buff, int offset, char* pack, int size, int parentsize);
 
