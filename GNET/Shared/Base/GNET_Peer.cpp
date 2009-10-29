@@ -166,38 +166,42 @@ int Peer::sendThread(void) {
 }
 
 int Peer::logcThread(void) {
-	recv_buffer.Lock();
+
+	ConnectionTable::iterator it;
+
 	while (true) {
-		recv_buffer.Wait();
+		recv_buffer.Lock();
+		if(recv_buffer->size() >0)
+		{
+			recv_buffer.Wait();
 
-		Datagram data = recv_buffer->front();
-		recv_buffer->pop();
+			Datagram data = recv_buffer->front();
+			recv_buffer->pop();
 
-		recv_buffer.Unlock();
+			recv_buffer.Unlock();
 
-		// If it's a data pack, put it on the buffer and we're done.
-		if (dynamic_cast<DataPack*>(data.pack)) {
-			game_recv_buffer.Lock();
-			game_recv_buffer->push(*(static_cast<DataPack*>(data.pack)));
-			game_recv_buffer.Pulse();
-			game_recv_buffer.Unlock();
+			// If it's a data pack, put it on the buffer and we're done.
+			if (dynamic_cast<DataPack*>(data.pack)) {
+				game_recv_buffer.Lock();
+				game_recv_buffer->push(*(static_cast<DataPack*>(data.pack)));
+				game_recv_buffer.Pulse();
+				game_recv_buffer.Unlock();
+			}
+
+			if (( it = connections.find( ADDR( *data.sock) )) != connections.end())
+				it->second->HandlePacket(&data);
+			else if (dynamic_cast<ConPack*>(data.pack) && connections.size() < max_clients) {
+				std::pair<ConnectionTable::iterator,bool> it_pair = 
+					connections.insert( ConnectionTablePair( ADDR(*data.sock), new Connection(*data.sock, this)));
+				it = it_pair.first;
+				it->second->HandlePacket(&data);
+			}
 		}
-
-		ConnectionTable::iterator it;
-		if (( it = connections.find( ADDR( *data.sock) )) != connections.end())
-			it->second->HandlePacket(&data);
-		else if (dynamic_cast<ConPack*>(data.pack) && connections.size() < max_clients) {
-			std::pair<ConnectionTable::iterator,bool> it_pair = 
-				connections.insert( ConnectionTablePair( ADDR(*data.sock), new Connection(*data.sock, this)));
-			it = it_pair.first;
-			it->second->HandlePacket(&data);
-		}
-
+		else
+			recv_buffer.Unlock();
 		for (it = connections.begin(); it != connections.end(); it++) {
 			it->second->Update();
 		}
-		
-		recv_buffer.Lock();
 	}
 
 	return 0;

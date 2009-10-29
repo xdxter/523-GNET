@@ -26,30 +26,13 @@ DWORD WINAPI client(LPVOID lp);
 int _tmain(int argc, _TCHAR* argv[])
 {
 	REGISTER_PACKET(MsgPacket, GNET::g_GamePackets);
-	CreateThread(NULL, 0, client, NULL, 0, NULL);
-	//Peer *gnet;
-	//gnet = new Peer();
-	//gnet->Startup(5,5555,50);
-	//gnet->Recieve();	//iter error
-	//d(received\n);
-	getchar();
-}
-
-DWORD WINAPI client(LPVOID lp)
-{
-	Sleep(500);
-	Peer *gnet;
 	MsgPacket msg;
 	strcpy(msg.msg, "This is a message.\n");
 
 	//GNET startup
+	Peer *gnet;
 	gnet = new Peer();
 	gnet->Startup(5, 3333, 50);
-
-	//Datapack NOT NECESSARY
-	//DataPack dpack;
-	//dpack.seq_num=100;
-	//dpack.game = static_cast<IGamePacket*>(&msg);
 
 	//sock_addr
 	SOCKADDR_IN target;
@@ -57,13 +40,15 @@ DWORD WINAPI client(LPVOID lp)
 	target.sin_family = AF_INET;
 	target.sin_port = htons(5555);
 
-	char buffer[10];
-	//sendto(gnet->socketID, buffer, 10, 0, (SOCKADDR *)&target, sizeof(SOCKADDR));
-	dd(sizeof(msg), d);
-	IGamePacket *ii = static_cast<IGamePacket*>(&msg);
-
-	gnet->Send(CreateDataPack(&msg), &target, false);
-	d(sent...\n);
+	int flag = 0;
+	flag = gnet->Connect("10.0.1.6", 5555);
+	dd(flag,d);
+	//if(flag)
+	//{
+	//	gnet->Send(CreateDataPack(&msg), &target, false);
+	//	d(sent...\n);
+	//}
+	getchar();
 	return 1;
 }
 
