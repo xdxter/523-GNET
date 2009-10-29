@@ -6,11 +6,11 @@ using namespace GNET;
 
 std::map<char, GamePktReg> GNET::g_GamePackets;
 
-DataPack CreateDataPack(IGamePacket* packet) {
-	DataPack data;
+DataPack* GNET::CreateDataPack(IGamePacket* packet) {
+	DataPack* data = new DataPack();
 	GamePktReg *reg = &g_GamePackets[ packet->GetType() ];
-	data.game = reg->instantiate();
-	memcpy(data.game, packet, reg->size );
+	data->game = reg->instantiate();
+	memcpy(data->game, packet, reg->size );
 
 	return data;
 }

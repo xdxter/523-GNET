@@ -13,13 +13,14 @@
 #define ddd(extra, x, fmt) printf(#extra "     =====DEBUG====> Line %u: %s=" "%" #fmt "\n" , __LINE__, #x, x)
 #define dddd() printf("*************DEBUG*************\n")
 
+using namespace GNET;
+
 #pragma pack(push,1)
 struct MsgPacket : GNET::IGamePacket {
 	char msg[20];
 	PACKET_TYPE(0, MsgPacket);
 };
 #pragma pack(pop)
-using namespace GNET;
 DWORD WINAPI client(LPVOID lp);
 
 int _tmain(int argc, _TCHAR* argv[])
@@ -45,10 +46,10 @@ DWORD WINAPI client(LPVOID lp)
 	gnet = new Peer();
 	gnet->Startup(5, 3333, 50);
 
-	//Datapack
-	DataPack dpack;
-	dpack.seq_num=100;
-	dpack.game = static_cast<IGamePacket*>(&msg);
+	//Datapack NOT NECESSARY
+	//DataPack dpack;
+	//dpack.seq_num=100;
+	//dpack.game = static_cast<IGamePacket*>(&msg);
 
 	//sock_addr
 	SOCKADDR_IN target;
@@ -58,8 +59,10 @@ DWORD WINAPI client(LPVOID lp)
 
 	char buffer[10];
 	//sendto(gnet->socketID, buffer, 10, 0, (SOCKADDR *)&target, sizeof(SOCKADDR));
+	dd(sizeof(msg), d);
+	IGamePacket *ii = static_cast<IGamePacket*>(&msg);
 
-	gnet->Send(static_cast<INetPacket*>(&dpack), &target, false);
+	gnet->Send(CreateDataPack(&msg), &target, false);
 	d(sent...\n);
 	getchar();
 	return 1;

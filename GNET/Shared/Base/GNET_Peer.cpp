@@ -99,8 +99,9 @@ void Peer::Send(INetPacket *pack, SOCKADDR_IN *remote, bool reliable)
 	Datagram dat;
 	dat.reliable = reliable;
 	dat.sock = new SOCKADDR_IN(*remote);
-	//dat.sock = remote;
-	dat.pack = pack;
+	memcpy(dat.pack, pack, sizeof(*pack));
+	//dat.pack = new INetPacket(*pack);
+	//dat.pack = pack;
 	Send(&dat);
 }
 void Peer::Send(Datagram *dat) 
