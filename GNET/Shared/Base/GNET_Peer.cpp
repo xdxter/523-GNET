@@ -165,7 +165,7 @@ int Peer::sendThread(void) {
 }
 
 int Peer::logcThread(void) {
-	Timer pacing(500);
+	Timer pacing(sleep_time);
 	ConnectionTable::iterator it;
 
 	while (true) {
