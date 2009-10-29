@@ -24,7 +24,7 @@ namespace GNET {
 		int Connect(char* ip, unsigned short port, unsigned int max_attempts = 7, unsigned int delay = 500);
 		int ListenForConnection(int max_clients = 1);
 
-		DataPack* Recieve(bool should_block);
+		Datagram* Recieve(bool should_block);
 		void Send(INetPacket *pack, SOCKADDR_IN *remote, bool reliable = false);
 
 		int recvThread(void);
@@ -46,7 +46,7 @@ namespace GNET {
 		Monitor<DgramBuffer> send_buffer;
 		Monitor<DgramBuffer> recv_buffer;
 		
-		Monitor<DataBuffer> game_recv_buffer;
+		Monitor<DgramBuffer> game_recv_buffer;
 
 		ConnectionTable connections;
 

@@ -27,13 +27,18 @@ int _tmain(int argc, _TCHAR* argv[])
 	REGISTER_PACKET(MsgPacket, GNET::g_GamePackets);
 	Peer *gnet;
 	gnet = new Peer();
-	gnet->Startup(5,5555,50);
-	gnet->ListenForConnection(0);
+	gnet->Startup(5,4444,50);
+	gnet->ListenForConnection(1);
 
 	while (true) {
-		DataPack *dat = gnet->Recieve(true);
-		if (dat)
-			ddd("Recieved message:",dynamic_cast<MsgPacket*>(dat->game)->msg,s);
+		Datagram *dat = gnet->Recieve(true);
+		DataPack *dp = dynamic_cast<DataPack*>(dat->pack);
+		if (dp) {
+			ddd("Recieved message:",dynamic_cast<MsgPacket*>(dp->game)->msg,s);
+			MsgPacket m;
+			strcpy(m.msg,"CANDLEJACK SAYS H-");
+			gnet->Send(CreateDataPack(&m), dat->sock, 1);
+		}
 	}
 	
 	return 0;

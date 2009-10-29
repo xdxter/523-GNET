@@ -83,7 +83,7 @@ int Peer::ListenForConnection(int max_clients) {
 	return 1;
 }
 
-DataPack* Peer::Recieve(bool block) {
+Datagram* Peer::Recieve(bool block) {
 	game_recv_buffer.Lock();
 	if (block) {
 		game_recv_buffer.Wait();
@@ -91,17 +91,16 @@ DataPack* Peer::Recieve(bool block) {
 		// Decrement the semaphore without blocking.
 		if (! game_recv_buffer->empty())
 			game_recv_buffer.Wait();
+		else {
+			game_recv_buffer.Unlock();
+			return 0;
+		}
 	}
-	INetPacket *ret = &(game_recv_buffer->front());
-	
-	if (dynamic_cast<DataPack*>(ret)) {
-		game_recv_buffer->pop();
-		game_recv_buffer.Unlock();
-		return static_cast<DataPack*>(ret);
-	} else {
-		game_recv_buffer.Unlock();
-		return 0;
-	}
+
+	Datagram *ret = &(game_recv_buffer->front());
+	game_recv_buffer->pop();
+	game_recv_buffer.Unlock();
+	return ret;
 }
 
 void Peer::Send(INetPacket *pack, SOCKADDR_IN *remote, bool reliable) 
@@ -183,7 +182,7 @@ int Peer::logcThread(void) {
 			// If it's a data pack, put it on the buffer and we're done.
 			if (dynamic_cast<DataPack*>(data.pack)) {
 				game_recv_buffer.Lock();
-				game_recv_buffer->push(*(static_cast<DataPack*>(data.pack)));
+				game_recv_buffer->push(data);
 				game_recv_buffer.Pulse();
 				game_recv_buffer.Unlock();
 			}
@@ -199,6 +198,7 @@ int Peer::logcThread(void) {
 		}
 		else
 			recv_buffer.Unlock();
+
 		for (it = connections.begin(); it != connections.end(); it++) {
 			it->second->Update();
 		}
