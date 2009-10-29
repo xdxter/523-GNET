@@ -186,13 +186,17 @@ int Peer::logcThread(void) {
 		ConnectionTable::iterator it;
 		if (( it = connections.find( ADDR( *data.sock) )) != connections.end())
 			it->second->HandlePacket(&data);
-		else if (dynamic_cast<ConPack*>(data.pack)) {
+		else if (dynamic_cast<ConPack*>(data.pack) && connections.size() < max_clients) {
 			std::pair<ConnectionTable::iterator,bool> it_pair = 
 				connections.insert( ConnectionTablePair( ADDR(*data.sock), new Connection(*data.sock, this)));
 			it = it_pair.first;
 			it->second->HandlePacket(&data);
 		}
 
+		for (it = connections.begin(); it != connections.end(); it++) {
+			it->second->Update();
+		}
+		
 		recv_buffer.Lock();
 	}
 
