@@ -3,6 +3,13 @@
 
 using namespace GNET;
 
+enum {
+	NOT_CONNECTED,
+	WAITING_FOR_SYN,
+	WAITING_FOR_ACK,
+	CONNECTED
+};
+
 Connection::Connection(SOCKADDR_IN remote, Peer* peer) {
 	this->remote = remote;
 	this->peer = peer;
@@ -16,7 +23,7 @@ void Connection::TryConnecting(int max_attempts, int ms_delay) {
 	connect_state = WAITING_FOR_SYN;
 	Handshake(1);
 	is_instigator = true;
-	this->max_attempts = max_attempts;
+	this->attempts = max_attempts;
 	this->ms_delay = ms_delay;
 }
 void Connection::Handshake(int i) {			
@@ -60,7 +67,7 @@ void Connection::HandlePacket(Datagram *data) {
 	}
 	if (is_instigator) {
 		if (dynamic_cast<SynPack*>(data->pack)) {
-			if (connect_state == WATING_FOR_SYN) {
+			if (connect_state == WAITING_FOR_SYN) {
 				peer->connecting.SetResult(true);
 				peer->connecting.Pulse();
 				connect_state = CONNECTED;

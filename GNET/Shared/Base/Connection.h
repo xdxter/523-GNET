@@ -21,17 +21,11 @@ namespace GNET {
 		Peer* peer;
 		int seq_num_out;
 	
-		enum {
-			NOT_CONNECTED,
-			WAITING_FOR_SYN,
-			WAITING_FOR_ACK,
-			CONNECTED
-		};
 		int connect_state;
 		clock_t connect_timeout;
 
 		bool is_instigator;
-		int max_attempts;
+		int attempts;
 		int ms_delay;
 
 		void Handshake(int i);

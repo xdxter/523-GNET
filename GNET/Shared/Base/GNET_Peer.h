@@ -2,6 +2,7 @@
 #include "GNET_Types.h"
 #include "Connection.h"
 #include "Monitor.h"
+#include "Turnkey.h"
 
 #pragma once
 
@@ -30,7 +31,7 @@ namespace GNET {
 		int logcThread(void);
 
 	protected:		
-		Turnkey connecting;
+		Turnkey<bool> connecting;
 
 		friend class Connection;		
 		void Send(Datagram *dat);

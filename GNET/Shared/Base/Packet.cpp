@@ -1,13 +1,14 @@
 #include <map>
 #include <queue>
 #include "GNET_Types.h"
+#include "GNET_Packet.h"
+
+using namespace GNET; 
 
 PktRegMap g_NetPackets;
 
 int copyin(char* buff, int offset, char* pack, int size, int parentsize);
 int copyout(char* buff, int offset, char* pack, int size, int parentsize);
-
-using namespace GNET; 
 
 int PacketEncoder::EncodePacket(INetPacket* pack, char* buffer, int maxsize, int i) {	
 	if (dynamic_cast<ConPack*>( pack )) {
@@ -72,10 +73,10 @@ INetPacket* PacketEncoder::DecodePacket(char* buffer, int i) {
 		DataPack *pack = new DataPack;
 		i += copyout(buffer, ++i, (char*)pack, sizeof(DataPack) - sizeof(IGamePacket*), sizeof(INetPacket));
 		int game_packet_type = buffer[i++];
-		std::map<char,GamePktReg>::iterator it;
+		PktRegMap::iterator it;
 		if ((it = g_GamePackets.find(game_packet_type)) != g_GamePackets.end()) {
-			GamePktReg* pkt = &(it->second);
-			pack->game = pkt->instantiate();
+			PktReg* pkt = &(it->second);
+			pack->game = static_cast<IGamePacket*>(pkt->instantiate());
 			i += copyout(buffer, i, (char*)(pack->game), pkt->size, sizeof(IGamePacket));
 		}
 		return pack;
