@@ -84,24 +84,31 @@ int Peer::ListenForConnection(int max_clients, unsigned int timeout_ms) {
 	return 1;
 }
 
-Datagram* Peer::Receive(bool block) {
+DataPack* Peer::Receive(bool block, SOCKADDR_IN *sock) {
 	game_recv_buffer.Lock();
 	if (block) {
 		game_recv_buffer.Wait();
-	} else {
+	} else {		
 		// Decrement the semaphore without blocking.
-		if (! game_recv_buffer->empty())
+		if (!game_recv_buffer->empty())		
 			game_recv_buffer.Wait();
-		else {
+		// Or exit if the buffer is empty.
+		else {		
 			game_recv_buffer.Unlock();
 			return 0;
 		}
 	}
 
-	Datagram *ret = &(game_recv_buffer->front());
+	Datagram *dgram = &(game_recv_buffer->front());
 	game_recv_buffer->pop();
 	game_recv_buffer.Unlock();
-	return ret;
+
+	// If we have been given a reference to a 
+	// SOCKADDR_IN, fill it.
+	if (sock) 
+		memcpy(sock, dgram->pack, sizeof(SOCKADDR_IN));		
+
+	return static_cast<DataPack*>(dgram->pack);
 }
 
 void Peer::Send(INetPacket *pack, SOCKADDR_IN *remote, bool reliable) 
@@ -128,7 +135,6 @@ int Peer::recvThread(void) {
 	int len = sizeof(SOCKADDR);
 	while (true) {
 		int recv = recvfrom(this->socketID, buff, 1024, 0, &remote, &len);
-		printf("Received....\n");
 		INetPacket* packet = PacketEncoder::DecodePacket(buff);
 		Datagram dat;
 		SOCKADDR_IN *sock = new SOCKADDR_IN( *((SOCKADDR_IN*)&remote));
@@ -157,7 +163,6 @@ int Peer::sendThread(void) {
 		int size = PacketEncoder::EncodePacket( data.pack, buffer, 100 );
 
 		sendto(this->socketID, buffer, size, 0, (SOCKADDR *)data.sock, sizeof(SOCKADDR));
-		printf("really sent...\n");
 		send_buffer.Lock();
 	}
 

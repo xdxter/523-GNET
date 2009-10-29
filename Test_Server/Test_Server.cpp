@@ -31,14 +31,14 @@ int _tmain(int argc, _TCHAR* argv[])
 	gnet->Startup(5,4444,50);
 	gnet->ListenForConnection(1);
 
-	while (true) {
-		Datagram *dat = gnet->Receive(true);
-		DataPack *dp = dynamic_cast<DataPack*>(dat->pack);
+	SOCKADDR_IN remote;
+	while (true) {		
+		DataPack *dp = gnet->Receive(true, &remote);
 		if (dp) {
 			ddd("Received message:",dynamic_cast<MsgPacket*>(dp->game)->msg,s);
 			MsgPacket m;
 			strcpy(m.msg,"CANDLEJACK SAYS H-");
-			gnet->Send(CreateDataPack(&m), dat->sock, 1);
+			gnet->Send(CreateDataPack(&m), &remote, 1);
 		}
 	}
 	

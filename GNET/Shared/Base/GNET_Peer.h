@@ -11,7 +11,6 @@ namespace GNET {
 	typedef std::pair<unsigned long, unsigned short> ulus;
 	typedef std::pair<ulus, Connection*> ConnectionTablePair;
 	typedef std::map<ulus, Connection* > ConnectionTable;
-	typedef std::queue<DataPack> DataBuffer;
 	typedef std::queue<Datagram> DgramBuffer;
 
 	class Peer {
@@ -24,7 +23,7 @@ namespace GNET {
 		int Connect(char* ip, unsigned short port, unsigned int max_attempts = 7, unsigned int delay = 500);
 		int ListenForConnection(int max_clients = 1, unsigned int timeout_ms = 500);
 
-		Datagram* Receive(bool should_block);
+		DataPack* Receive(bool should_block, SOCKADDR_IN *sock = 0);
 		void Send(INetPacket *pack, SOCKADDR_IN *remote, bool reliable = false);
 
 		int recvThread(void);
