@@ -9,6 +9,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Test_Server", "Test_Server\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MemoryTest", "MemoryTest\MemoryTest.vcproj", "{28A82F11-E620-48CA-AE8B-3A9DFB680478}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test", "test\test.vcproj", "{08E3FA69-C3EC-4EA0-9793-DFF8C3F7F8C2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -31,6 +33,10 @@ Global
 		{28A82F11-E620-48CA-AE8B-3A9DFB680478}.Debug|Win32.Build.0 = Debug|Win32
 		{28A82F11-E620-48CA-AE8B-3A9DFB680478}.Release|Win32.ActiveCfg = Release|Win32
 		{28A82F11-E620-48CA-AE8B-3A9DFB680478}.Release|Win32.Build.0 = Release|Win32
+		{08E3FA69-C3EC-4EA0-9793-DFF8C3F7F8C2}.Debug|Win32.ActiveCfg = Debug|Win32
+		{08E3FA69-C3EC-4EA0-9793-DFF8C3F7F8C2}.Debug|Win32.Build.0 = Debug|Win32
+		{08E3FA69-C3EC-4EA0-9793-DFF8C3F7F8C2}.Release|Win32.ActiveCfg = Release|Win32
+		{08E3FA69-C3EC-4EA0-9793-DFF8C3F7F8C2}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -29,7 +29,9 @@ namespace GNET {
 		int sendThread(void);
 		int logcThread(void);
 
-	protected:
+	protected:		
+		Turnkey connecting;
+
 		friend class Connection;		
 		void Send(Datagram *dat);
 	private:
@@ -46,7 +48,6 @@ namespace GNET {
 
 		ConnectionTable connections;
 
-		Turnkey connecting;
 
 		HANDLE recv_thread;
 		HANDLE send_thread;

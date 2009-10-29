@@ -68,7 +68,7 @@ int Peer::Connect(char* ip, unsigned short port, unsigned int max_attempts, unsi
 
 	Connection* c = new Connection(remote, this);
 	connections.insert( std::pair< ulus, Connection*>( ADDR(remote), c ) );
-	c->TryConnect();
+	c->TryConnecting(max_attempts, delay);
 
 	connecting.Wait();
 
