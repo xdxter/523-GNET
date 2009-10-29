@@ -38,16 +38,13 @@ int _tmain(int argc, _TCHAR* argv[])
 	SOCKADDR_IN target;
 	target.sin_addr.S_un.S_addr = inet_addr("10.0.1.6");
 	target.sin_family = AF_INET;
-	target.sin_port = htons(5555);
+	target.sin_port = htons(4444);
 
 	int flag = 0;
-	flag = gnet->Connect("10.0.1.6", 5555);
-	dd(flag,d);
-	//if(flag)
-	//{
-	//	gnet->Send(CreateDataPack(&msg), &target, false);
-	//	d(sent...\n);
-	//}
+	flag = gnet->Connect("10.0.1.6", 4444,50);
+	getchar();
+	Datagram * p = gnet->Recieve(true);
+	dd(static_cast<MsgPacket*>(static_cast<DataPack*>(p->pack)->game)->msg, s);
 	getchar();
 	return 1;
 }
