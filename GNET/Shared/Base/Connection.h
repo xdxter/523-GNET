@@ -12,7 +12,7 @@ namespace GNET {
 
 		Connection(SOCKADDR_IN remote, Peer* peer);
 		void Update();
-		void HandlePacket(Datagram *data);
+		bool HandlePacket(Datagram *data);
 		int Seq_Num();
 
 		void TryConnecting(int max_attempts = 7, int ms_delay = 500);
@@ -25,6 +25,7 @@ namespace GNET {
 		Timer connect_timer;
 
 		bool is_instigator;
+		bool is_connecting;
 		int attempts;
 		int ms_delay;
 
