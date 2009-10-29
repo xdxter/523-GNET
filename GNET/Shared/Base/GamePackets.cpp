@@ -4,12 +4,12 @@
 
 using namespace GNET;
 
-std::map<char, GamePktReg> GNET::g_GamePackets;
+PktRegMap GNET::g_GamePackets;
 
 DataPack* GNET::CreateDataPack(IGamePacket* packet) {
 	DataPack* data = new DataPack();
-	GamePktReg *reg = &g_GamePackets[ packet->GetType() ];
-	data->game = reg->instantiate();
+	PktReg *reg = &g_GamePackets[ packet->GetType() ];
+	data->game = static_cast<IGamePacket*>(reg->instantiate());
 	memcpy(data->game, packet, reg->size );
 
 	return data;

@@ -10,5 +10,6 @@ namespace GNET {
 		virtual char GetType() = 0;
 	};
 
+	DataPack* CreateDataPack(IGamePacket* packet);
 	extern PktRegMap g_GamePackets;	
 }
