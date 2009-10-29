@@ -35,7 +35,7 @@ void Connection::Handshake(int i) {
 		&remote,false);
 
 	// Set to wait for Syn
-	connect_timeout = clock() + CLOCKS_PER_SEC * ((float)ms_delay / 1000.0f);
+	connect_timeout = clock() + (int)(CLOCKS_PER_SEC * ((float)ms_delay / 1000.0f));
 }
 
 void Connection::Update() {
