@@ -13,3 +13,5 @@ namespace GNET {
 	DataPack* CreateDataPack(IGamePacket* packet);
 	extern PktRegMap g_GamePackets;	
 }
+
+

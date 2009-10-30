@@ -82,6 +82,12 @@ namespace GNET {
 		}
 	};
 
+	class PacketCompressor{
+	public:
+		static void compress(char* buffer, int &total_length);
+		static void decompress(char * buffer);
+	};
+
 
 	
 }

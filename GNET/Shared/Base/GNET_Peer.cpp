@@ -128,6 +128,8 @@ int Peer::recvThread(void) {
 	int len = sizeof(SOCKADDR);
 	while (true) {
 		int recv = recvfrom(this->socketID, buff, 1024, 0, &remote, &len);
+		PacketCompressor::decompress(buff);
+
 		printf("Received....\n");
 		INetPacket* packet = PacketEncoder::DecodePacket(buff);
 		Datagram dat;
@@ -155,6 +157,9 @@ int Peer::sendThread(void) {
 		char buffer[100];
 
 		int size = PacketEncoder::EncodePacket( data.pack, buffer, 100 );
+		printf("size = %d\n", size);
+		PacketCompressor::compress(buffer, size);
+		printf("size2 = %d\n", size);
 
 		sendto(this->socketID, buffer, size, 0, (SOCKADDR *)data.sock, sizeof(SOCKADDR));
 		printf("really sent...\n");

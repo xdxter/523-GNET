@@ -27,7 +27,7 @@ int _tmain(int argc, _TCHAR* argv[])
 {
 	REGISTER_PACKET(MsgPacket, GNET::g_GamePackets);
 	MsgPacket msg;
-	strcpy(msg.msg, "This is a message.\n");
+	strcpy(msg.msg, "This is a new msg.\n");
 
 	//GNET startup
 	Peer *gnet;
@@ -36,14 +36,16 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	//sock_addr
 	SOCKADDR_IN target;
-	target.sin_addr.S_un.S_addr = inet_addr("10.0.1.6");
+	target.sin_addr.S_un.S_addr = inet_addr("127.0.0.1");
 	target.sin_family = AF_INET;
 	target.sin_port = htons(4444);
 
 	int flag = 0;
-	flag = gnet->Connect("10.0.1.6", 4444,50);
+	//flag = gnet->Connect("127.0.0.1", 4444,50);
+	gnet->Send(CreateDataPack(&msg),&target);
 	getchar();
-	Datagram * p = gnet->Recieve(true);
+	Datagram * p = gnet->Receive(true);
+	d(recccccc\n);
 	dd(static_cast<MsgPacket*>(static_cast<DataPack*>(p->pack)->game)->msg, s);
 	getchar();
 	return 1;

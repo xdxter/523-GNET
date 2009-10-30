@@ -1,5 +1,6 @@
 #include <map>
 #include <queue>
+#include <string.h>
 #include "GNET_Types.h"
 #include "GNET_Packet.h"
 
@@ -98,3 +99,78 @@ int copyout(char* buff, int offset, char* pack, int size, int psize) {
 	return size;
 }
 
+void PacketCompressor::compress(char* ptr, int &total_length)
+{
+	char *p=new char[total_length];
+	char begin=*ptr,tab=8;
+	int count=1,pcount=0;
+	
+
+	for(int i=1;i<total_length;i++)
+	{
+		if(*(ptr+i)==begin)
+		{
+			count++;
+		}
+		else
+		{
+			if(count>=3)			//compress the same character
+			{
+				*(p+pcount++)=begin;
+				*(p+pcount++)=tab;
+				if(begin!=0)
+					*(p+pcount++)=count;	//compress int
+				begin=*(ptr+i);
+				count=1;
+			}
+			else
+			{
+				for(int j=0;j<count;j++)
+					*(p+pcount++)=begin;
+				begin=*(ptr+i);
+				count=1;
+			}
+		}
+	}
+	*(p+pcount++)='\0';
+	memcpy(ptr,p,pcount);
+	total_length=pcount;
+	delete p;
+}
+
+void PacketCompressor::decompress(char* ptr)
+{
+	int total_length = 100;
+	char *p=new char[total_length];
+	memcpy(p,ptr,total_length);
+	int count=0;
+	char begin,tab=8;
+
+	for(int i=0;i<total_length;i++)
+	{
+		begin=*(p+i);
+		if(begin==0)
+		{
+			if(*(p+i+1)==tab)	//decompress int
+			{
+				*(ptr+count++)=0;
+				*(ptr+count++)=0;
+				i++;
+			}
+			*(ptr+count++)=begin;
+		}
+		else
+		{
+			if(*(p+i+1)==tab)	//decompress the same character
+			{
+				for(int j=0;j<*(p+i+2)-1;j++)
+					*(ptr+count++)=begin;
+				i+=2;
+			}
+			*(ptr+count++)=begin;
+			
+		}
+	}
+	total_length=count;
+	delete p;
+}

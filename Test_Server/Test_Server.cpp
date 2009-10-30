@@ -29,7 +29,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	Peer *gnet;
 	gnet = new Peer();
 	gnet->Startup(5,4444,50);
-	gnet->ListenForConnection(1);
+	//gnet->ListenForConnection(1);
 
 	while (true) {
 		Datagram *dat = gnet->Receive(true);
