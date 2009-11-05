@@ -2,6 +2,7 @@
 #include <map>
 #include "winsock2.h"
 #include "GNET_Peer.h"
+#include "Reliable_UDP.h"
 #include "Timer.h"
 
 #define MAX_PACKETSIZE 16
@@ -115,15 +116,17 @@ DataPack* Peer::Receive(bool block, SOCKADDR_IN *sock) {
 
 void Peer::Send(INetPacket *pack, SOCKADDR_IN *remote, bool reliable) 
 {	
-	Datagram dat;
-	//dat.reliable = reliable;
+	//handle reliable udp send
 	if (reliable){
 		dynamic_cast<DataPack*>(pack)->reliable = true;
 		dynamic_cast<DataPack*>(pack)->seq_num = this->incremental_seq_id++;
+		rudpTracker.AddOutgoingPack(dynamic_cast<DataPack*>(pack), remote);
 	}
 	else{
 		dynamic_cast<DataPack*>(pack)->reliable = false;
 	}
+
+	Datagram dat;
 	dat.sock = new SOCKADDR_IN(*remote);
 	INetPacket* net = static_cast<INetPacket*>(g_NetPackets[ pack->GetType() ].instantiate());
 	memcpy(net,pack, g_NetPackets[pack->GetType()].size);
@@ -221,6 +224,7 @@ int Peer::logcThread(void) {
 		for (it = connections.begin(); it != connections.end(); it++) {
 			it->second->Update();
 		}
+		rudpTracker.Update();
 		pacing.WaitTillFinished();
 	}
 
