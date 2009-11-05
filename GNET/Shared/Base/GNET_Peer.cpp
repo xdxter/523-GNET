@@ -13,7 +13,7 @@ DWORD WINAPI runRecvThread(void* param) { return ((Peer*)param)->recvThread(); }
 DWORD WINAPI runSendThread(void* param) { return ((Peer*)param)->sendThread(); }
 DWORD WINAPI runLogcThread(void* param) { return ((Peer*)param)->logcThread(); }
 
-Peer::Peer(unsigned int max_packet_size)
+Peer::Peer(unsigned int max_packet_size):rudpTracker(this)
 {	
 	PacketEncoder::RegisterNetPackets();
 	this->max_packet_size = max_packet_size;

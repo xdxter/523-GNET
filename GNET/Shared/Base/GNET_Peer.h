@@ -32,6 +32,7 @@ namespace GNET {
 		int connect_timeout;
 
 		friend class Connection;		
+		friend class ReliableTracker;
 		void Send(Datagram *dat);
 	private:
 		unsigned int max_connections;

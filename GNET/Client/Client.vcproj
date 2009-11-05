@@ -221,6 +221,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\Shared\Base\Reliable_UDP.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\Shared\Base\Timer.cpp"
 				>
 			</File>
