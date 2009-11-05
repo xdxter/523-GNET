@@ -1,4 +1,3 @@
-
 #include "GNET_Peer.h"
 #include "Connection.h"
 
@@ -7,16 +6,12 @@ using namespace GNET;
 
 void ReliableTracker::Update()
 {
-	printf("number of rudp pack in progress is %d\n", out.size());
 	for (it = out.begin(); it != out.end(); it++) {
 		if(it->second->resend_timer.Finished()) {
+			if(it->second->sender == true)	//
 			printf("resending....\n");
 			peer->Send(it->second->dat);
 			it->second->resend_timer.Reset(RUDP_TIMEOUT);
-		}
-		else
-		{
-			printf("not resending....\n");
 		}
 	}
 }
@@ -31,8 +26,20 @@ void ReliableTracker::AddOutgoingPack(DataPack * pack, SOCKADDR_IN * remote)
 
 	RudpItem * item = new RudpItem;
 	item->dat = dat;
-	item->resend_timer.Stop();
 	item->resend_timer.Reset(RUDP_TIMEOUT);
+	item->sender = true;
 	out[ReliableKey(ADDR(*remote), pack->seq_num)] = item;
 	printf("ADDED!!!!!!!!!!!\n");
+}
+
+void ReliableTracker::HandlePacket(Datagram * dat)
+{
+	if (dynamic_cast<DataPack*>(dat->pack))
+	{
+		printf("1 1 1\n");
+	}
+	else if(dynamic_cast<RUDPAckPack*>(dat->pack))
+	{
+		printf("2 2 2 \n");
+	}
 }

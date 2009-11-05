@@ -5,8 +5,9 @@
 
 namespace GNET {
 
-#define RUDP_TIMEOUT 10000
+#define RUDP_TIMEOUT 1000
 	struct RudpItem{
+		bool sender;
 		Datagram * dat;
 		Timer resend_timer;
 	};
@@ -19,6 +20,7 @@ namespace GNET {
 		~ReliableTracker(){}
 		void Update();
 		void AddOutgoingPack(DataPack * pack, SOCKADDR_IN * remote);
+		void HandlePacket(Datagram * dat);
 	private:
 		ReliableTable out;
 		ReliableTableIter it;

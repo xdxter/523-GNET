@@ -25,6 +25,11 @@ int PacketEncoder::EncodePacket(INetPacket* pack, char* buffer, int maxsize, int
 		i += copyin(buffer, i, (char*)pack, sizeof(AckPack), sizeof(INetPacket));
 		return i;
 	}
+	if (dynamic_cast<RUDPAckPack*>( pack )) {
+		buffer[i++] = (char)RUDP_ACK_PACKET;
+		i += copyin(buffer, i, (char*)pack, sizeof(RUDPAckPack), sizeof(INetPacket));
+		return i;
+	}
 	if (dynamic_cast<MarcoPack*>( pack )) {
 		buffer[i++] = (char)MARCO_PACKET;
 		i += copyin(buffer, i, (char*)pack, sizeof(MarcoPack), sizeof(INetPacket));
@@ -58,6 +63,11 @@ INetPacket* PacketEncoder::DecodePacket(char* buffer, int i) {
 	if (*buffer == ACK_PACKET) {
 		INetPacket *pack = new AckPack;
 		i += copyout(buffer, ++i, (char*)pack, sizeof(AckPack), sizeof(INetPacket));
+		return pack;
+	}
+	if (*buffer == RUDP_ACK_PACKET) {
+		INetPacket *pack = new RUDPAckPack;
+		i += copyout(buffer, ++i, (char*)pack, sizeof(RUDPAckPack), sizeof(INetPacket));
 		return pack;
 	}
 	if (*buffer == MARCO_PACKET) {

@@ -205,10 +205,15 @@ int Peer::logcThread(void) {
 				game_recv_buffer.Pulse();
 				game_recv_buffer.Unlock();
 				if (dynamic_cast<DataPack*>(data.pack)->reliable ==true)
+				{
 					printf("Received a reliable datapack with seq ID = %d\n", dynamic_cast<DataPack*>(data.pack)->seq_num);
+					rudpTracker.HandlePacket(&data);
+				}
 			}
-
-			if (( it = connections.find( ADDR( *data.sock) )) != connections.end())
+			if(dynamic_cast<RUDPAckPack*>(data.pack)){
+				//rudpTracker.
+			}
+			else if (( it = connections.find( ADDR( *data.sock) )) != connections.end())
 				it->second->HandlePacket(&data);
 			else if (dynamic_cast<ConPack*>(data.pack) && connections.size() < max_clients) {
 				std::pair<ConnectionTable::iterator,bool> it_pair = 

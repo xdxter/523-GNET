@@ -30,6 +30,7 @@ namespace GNET {
 		CON_PACKET = 0,
 		SYN_PACKET,
 		ACK_PACKET,
+		RUDP_ACK_PACKET,
 		DATA_PACKET,
 		MARCO_PACKET
 	};
@@ -52,7 +53,10 @@ namespace GNET {
 	{
 		PACKET_TYPE(ACK_PACKET, AckPack);
 	};
-
+	struct RUDPAckPack : INetPacket
+	{
+		PACKET_TYPE(RUDP_ACK_PACKET, RUDPAckPack);
+	};
 	struct DataPack : INetPacket
 	{
 		bool reliable;
@@ -78,6 +82,7 @@ namespace GNET {
 			REGISTER_PACKET(ConPack,g_NetPackets);
 			REGISTER_PACKET(AckPack,g_NetPackets);
 			REGISTER_PACKET(SynPack,g_NetPackets);
+			REGISTER_PACKET(RUDPAckPack, g_NetPackets);
 			REGISTER_PACKET(DataPack,g_NetPackets);
 			REGISTER_PACKET(MarcoPack,g_NetPackets);
 		}

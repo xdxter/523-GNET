@@ -36,9 +36,9 @@ int _tmain(int argc, _TCHAR* argv[])
 		DataPack *dp = gnet->Receive(true, &remote);
 		if (dp) {
 			printf("Received message: %s\n", dynamic_cast<MsgPacket*>(dp->game)->msg);
-			MsgPacket m;
-			strcpy(m.msg,"CANDLEJACK SAYS HI");
-			gnet->Send(CreateDataPack(&m), &remote, 1);
+			//MsgPacket m;
+			//strcpy(m.msg,"CANDLEJACK SAYS HI");
+			//gnet->Send(CreateDataPack(&m), &remote, 1);
 		}
 	}
 	
