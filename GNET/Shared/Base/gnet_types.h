@@ -9,14 +9,17 @@
 
 namespace GNET {
 
+	class Connection;
+	class ReliableTracker;
+	class Peer;
+	struct RudpItem;
+
 	struct Datagram {
 		bool reliable;
 		SOCKADDR_IN *sock;
 		INetPacket *pack;
 	};
 
-	class Connection;
-	class ReliableTracker;
 
 	//common
 #define ADDR( sa ) ulus( (sa).sin_addr.S_un.S_addr, (sa).sin_port)
@@ -27,11 +30,10 @@ namespace GNET {
 	typedef std::map<ulus, Connection* > ConnectionTable;
 	typedef std::queue<Datagram> DgramBuffer;
 
-
 	//reliable udp map
 	typedef std::pair<ulus, int> ReliableKey;
-	typedef std::pair<ReliableKey, ReliableTracker*> ReliableTablePair;
-	typedef std::map<ReliableKey, ReliableTracker*> ReliableTable;
-	typedef std::map<ReliableKey, ReliableTracker*>::iterator ReliableTableIter;
+	typedef std::pair<ReliableKey, RudpItem*> ReliableTablePair;
+	typedef std::map<ReliableKey, RudpItem*> ReliableTable;
+	typedef std::map<ReliableKey, RudpItem*>::iterator ReliableTableIter;
 
 }
