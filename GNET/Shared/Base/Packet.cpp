@@ -36,7 +36,6 @@ int PacketEncoder::EncodePacket(INetPacket* pack, char* buffer, int maxsize, int
 		buffer[i++] = (char)DATA_PACKET;
 		i += copyin(buffer, i, (char*)pack, sizeof(DataPack) - sizeof(IGamePacket*), sizeof(INetPacket));
 		IGamePacket *game = static_cast<DataPack*>(pack)->game;
-		//EncodeGamePacket(game, buffer, i, maxsize)
 		char type = buffer[i++] = game->GetType();
 		i += copyin(buffer, i, (char*)game, g_GamePackets[type].size, sizeof(IGamePacket));
 		return i;

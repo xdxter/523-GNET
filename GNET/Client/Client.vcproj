@@ -168,6 +168,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\Shared\Base\GNET_GamePacket.h"
+				>
+			</File>
+			<File
 				RelativePath="..\Shared\Base\GNET_Packet.h"
 				>
 			</File>
@@ -176,7 +180,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\Shared\Base\GNET_Types.h"
+				>
+			</File>
+			<File
 				RelativePath="..\Shared\Base\Monitor.h"
+				>
+			</File>
+			<File
+				RelativePath="..\Shared\Base\Reliable_UDP.h"
 				>
 			</File>
 			<File
@@ -201,15 +213,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\Shared\Base\GNET_GamePacket.h"
-				>
-			</File>
-			<File
 				RelativePath="..\Shared\Base\GNET_Peer.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\Shared\Base\GNET_Types.h"
 				>
 			</File>
 			<File

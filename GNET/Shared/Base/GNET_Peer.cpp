@@ -16,6 +16,7 @@ Peer::Peer(unsigned int max_packet_size)
 {	
 	PacketEncoder::RegisterNetPackets();
 	this->max_packet_size = max_packet_size;
+	this->incremental_seq_id = 0;
 }
 
 Peer::~Peer() 
@@ -115,7 +116,14 @@ DataPack* Peer::Receive(bool block, SOCKADDR_IN *sock) {
 void Peer::Send(INetPacket *pack, SOCKADDR_IN *remote, bool reliable) 
 {	
 	Datagram dat;
-	dat.reliable = reliable;
+	//dat.reliable = reliable;
+	if (reliable){
+		dynamic_cast<DataPack*>(pack)->reliable = true;
+		dynamic_cast<DataPack*>(pack)->seq_num = this->incremental_seq_id++;
+	}
+	else{
+		dynamic_cast<DataPack*>(pack)->reliable = false;
+	}
 	dat.sock = new SOCKADDR_IN(*remote);
 	INetPacket* net = static_cast<INetPacket*>(g_NetPackets[ pack->GetType() ].instantiate());
 	memcpy(net,pack, g_NetPackets[pack->GetType()].size);
@@ -193,6 +201,8 @@ int Peer::logcThread(void) {
 				game_recv_buffer->push(data);
 				game_recv_buffer.Pulse();
 				game_recv_buffer.Unlock();
+				if (dynamic_cast<DataPack*>(data.pack)->reliable ==true)
+					printf("Received a reliable datapack with seq ID = %d\n", dynamic_cast<DataPack*>(data.pack)->seq_num);
 			}
 
 			if (( it = connections.find( ADDR( *data.sock) )) != connections.end())

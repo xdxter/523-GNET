@@ -42,7 +42,7 @@ namespace GNET {
 #pragma pack(push, 1)
 	struct ConPack : INetPacket
 	{
-		PACKET_TYPE( CON_PACKET, ConPack )
+		PACKET_TYPE(CON_PACKET, ConPack);
 	};
 	struct SynPack : INetPacket
 	{
@@ -55,6 +55,7 @@ namespace GNET {
 
 	struct DataPack : INetPacket
 	{
+		bool reliable;
 		unsigned int seq_num;
 		IGamePacket* game;
 		virtual ~DataPack() {

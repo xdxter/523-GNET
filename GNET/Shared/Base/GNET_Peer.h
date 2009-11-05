@@ -1,17 +1,13 @@
 #include "GNET_Packet.h"
 #include "GNET_Types.h"
 #include "Connection.h"
+#include "Reliable_UDP.h"
 #include "Monitor.h"
 #include "Turnkey.h"
 
 #pragma once
 
 namespace GNET {
-#define ADDR( sa ) ulus( (sa).sin_addr.S_un.S_addr, (sa).sin_port)
-	typedef std::pair<unsigned long, unsigned short> ulus;
-	typedef std::pair<ulus, Connection*> ConnectionTablePair;
-	typedef std::map<ulus, Connection* > ConnectionTable;
-	typedef std::queue<Datagram> DgramBuffer;
 
 	class Peer {
 
@@ -38,8 +34,9 @@ namespace GNET {
 		friend class Connection;		
 		void Send(Datagram *dat);
 	private:
-		int max_connections;
-		int max_clients;
+		unsigned int max_connections;
+		unsigned int max_clients;
+		unsigned int incremental_seq_id;
 		int sleep_time;
 		unsigned int max_packet_size;
 
@@ -49,7 +46,7 @@ namespace GNET {
 		Monitor<DgramBuffer> game_recv_buffer;
 
 		ConnectionTable connections;
-
+		ReliableTracker rudpTracker;	//reliable udp controller
 
 		HANDLE recv_thread;
 		HANDLE send_thread;

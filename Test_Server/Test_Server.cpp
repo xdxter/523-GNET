@@ -16,8 +16,8 @@
 
 #pragma pack(push,1)
 struct MsgPacket : GNET::IGamePacket {
-	char msg[20];
-	PACKET_TYPE(0, MsgPacket);
+	char msg[30];
+	PACKET_TYPE(8, MsgPacket);
 };
 #pragma pack(pop)
 
@@ -35,9 +35,9 @@ int _tmain(int argc, _TCHAR* argv[])
 	while (true) {		
 		DataPack *dp = gnet->Receive(true, &remote);
 		if (dp) {
-			ddd("Received message:",dynamic_cast<MsgPacket*>(dp->game)->msg,s);
+			printf("Received message: %s\n", dynamic_cast<MsgPacket*>(dp->game)->msg);
 			MsgPacket m;
-			strcpy(m.msg,"CANDLEJACK SAYS H-");
+			strcpy(m.msg,"CANDLEJACK SAYS HI");
 			gnet->Send(CreateDataPack(&m), &remote, 1);
 		}
 	}
