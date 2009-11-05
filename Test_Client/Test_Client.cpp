@@ -7,12 +7,6 @@
 #include "GNET_Packet.h"
 #include "GNET_Peer.h"
 
-#define __debug__ __tool__
-#define d(x) printf(#x);
-#define dd(x, fmt) printf("=====DEBUG====> Line %u: %s=" "%" #fmt "\n" , __LINE__, #x, x)
-#define ddd(extra, x, fmt) printf(#extra "     =====DEBUG====> Line %u: %s=" "%" #fmt "\n" , __LINE__, #x, x)
-#define dddd() printf("*************DEBUG*************\n")
-
 using namespace GNET;
 
 #pragma pack(push,1)
@@ -21,30 +15,43 @@ struct MsgPacket : GNET::IGamePacket {
 	PACKET_TYPE(0, MsgPacket);
 };
 #pragma pack(pop)
-DWORD WINAPI client(LPVOID lp);
+
+#define LISTEN_PORT 3333
+#define SERVER_PORT 4444
+#define SERVER_ADDY "10.0.1.6"
 
 int _tmain(int argc, _TCHAR* argv[])
 {
 	REGISTER_PACKET(MsgPacket, GNET::g_GamePackets);
-	MsgPacket msg;
-	strcpy(msg.msg, "This is a message.\n");
-
+	
 	//GNET startup
 	Peer *gnet;
 	gnet = new Peer();
-	gnet->Startup(5, 3333, 50);
+	gnet->Startup(1, LISTEN_PORT, 50);
 
-	//sock_addr
-	SOCKADDR_IN target;
-	target.sin_addr.S_un.S_addr = inet_addr("10.0.1.6");
-	target.sin_family = AF_INET;
-	target.sin_port = htons(4444);
+	// Connect to server
+	bool connected = gnet->Connect(SERVER_ADDY, SERVER_PORT, 3);
+	if (!connected) {
+		printf("Failed to connect to server.\n");
+	} else {
+		printf("Connected to server succesfully.\n");
+	
+		// Send a data packet
+		MsgPacket msg;
+		strcpy(msg.msg, "This is a message.\n");
 
-	int flag = 0;
-	flag = gnet->Connect("10.0.1.6", 4444,50);
-	getchar();
-	DataPack * p = gnet->Receive(true);
-	dd(static_cast<MsgPacket*>(p->game)->msg, s);
+		SOCKADDR_IN target;
+		target.sin_addr.S_un.S_addr = inet_addr(SERVER_ADDY);
+		target.sin_family = AF_INET;
+		target.sin_port = htons(SERVER_PORT);
+
+		gnet->Send(CreateDataPack(&msg),&target);
+
+		// Receive a packet. Passing true in means that the call will block until one is received.
+		DataPack * p = gnet->Receive(true);
+		printf("Message Received: %s\n", static_cast<MsgPacket*>(p->game)->msg);
+	}
+
 	getchar();
 	return 1;
 }

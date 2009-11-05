@@ -12,9 +12,10 @@ DWORD WINAPI runRecvThread(void* param) { return ((Peer*)param)->recvThread(); }
 DWORD WINAPI runSendThread(void* param) { return ((Peer*)param)->sendThread(); }
 DWORD WINAPI runLogcThread(void* param) { return ((Peer*)param)->logcThread(); }
 
-Peer::Peer()
+Peer::Peer(unsigned int max_packet_size)
 {	
 	PacketEncoder::RegisterNetPackets();
+	this->max_packet_size = max_packet_size;
 }
 
 Peer::~Peer() 
@@ -106,7 +107,7 @@ DataPack* Peer::Receive(bool block, SOCKADDR_IN *sock) {
 	// If we have been given a reference to a 
 	// SOCKADDR_IN, fill it.
 	if (sock) 
-		memcpy(sock, dgram->pack, sizeof(SOCKADDR_IN));		
+		memcpy(sock, dgram->sock, sizeof(SOCKADDR_IN));		
 
 	return static_cast<DataPack*>(dgram->pack);
 }
@@ -158,9 +159,9 @@ int Peer::sendThread(void) {
 		send_buffer->pop();
 		send_buffer.Unlock();
 
-		char buffer[100];
+		char buffer[1024];
 
-		int size = PacketEncoder::EncodePacket( data.pack, buffer, 100 );
+		int size = PacketEncoder::EncodePacket( data.pack, buffer, 1024 );
 
 		sendto(this->socketID, buffer, size, 0, (SOCKADDR *)data.sock, sizeof(SOCKADDR));
 		send_buffer.Lock();

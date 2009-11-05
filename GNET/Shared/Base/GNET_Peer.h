@@ -16,7 +16,7 @@ namespace GNET {
 	class Peer {
 
 	public:
-		Peer();
+		Peer(unsigned int max_packet_size = 1024);
 		virtual ~Peer();
 
 		int Peer::Startup(int max_connections, unsigned short port, int sleep_time = 20);
@@ -41,6 +41,7 @@ namespace GNET {
 		int max_connections;
 		int max_clients;
 		int sleep_time;
+		unsigned int max_packet_size;
 
 		Monitor<DgramBuffer> send_buffer;
 		Monitor<DgramBuffer> recv_buffer;
