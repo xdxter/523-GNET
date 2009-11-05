@@ -49,9 +49,6 @@ int _tmain(int argc, _TCHAR* argv[])
 
 		gnet->Send(CreateDataPack(&msg),&target, true);
 		gnet->Send(CreateDataPack(&msg),&target, true);
-		gnet->Send(CreateDataPack(&msg),&target, true);
-		gnet->Send(CreateDataPack(&msg),&target, true);
-		gnet->Send(CreateDataPack(&msg),&target, true);
 
 		// Receive a packet. Passing true in means that the call will block until one is received.
 		DataPack * p = gnet->Receive(true);
