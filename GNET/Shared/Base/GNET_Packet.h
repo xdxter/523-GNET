@@ -55,6 +55,7 @@ namespace GNET {
 	};
 	struct RUDPAckPack : INetPacket
 	{
+		int seq_num;
 		PACKET_TYPE(RUDP_ACK_PACKET, RUDPAckPack);
 	};
 	struct DataPack : INetPacket

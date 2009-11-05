@@ -31,6 +31,7 @@ namespace GNET {
 	typedef std::queue<Datagram> DgramBuffer;
 
 	//reliable udp map
+	//typedef std::pair<bool, unsigned int> boui;
 	typedef std::pair<ulus, int> ReliableKey;
 	typedef std::pair<ReliableKey, RudpItem*> ReliableTablePair;
 	typedef std::map<ReliableKey, RudpItem*> ReliableTable;

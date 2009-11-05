@@ -122,7 +122,7 @@ void Peer::Send(INetPacket *pack, SOCKADDR_IN *remote, bool reliable)
 		dynamic_cast<DataPack*>(pack)->seq_num = this->incremental_seq_id++;
 		rudpTracker.AddOutgoingPack(dynamic_cast<DataPack*>(pack), remote);
 	}
-	else{
+	else if (dynamic_cast<DataPack*>(pack)){
 		dynamic_cast<DataPack*>(pack)->reliable = false;
 	}
 
@@ -211,7 +211,7 @@ int Peer::logcThread(void) {
 				}
 			}
 			if(dynamic_cast<RUDPAckPack*>(data.pack)){
-				//rudpTracker.
+				rudpTracker.HandlePacket(&data);
 			}
 			else if (( it = connections.find( ADDR( *data.sock) )) != connections.end())
 				it->second->HandlePacket(&data);

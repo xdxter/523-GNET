@@ -6,10 +6,11 @@
 namespace GNET {
 
 #define RUDP_TIMEOUT 1000
+#define RUDP_ID_RESERVATION_TIMEOUT 60000	//id can't be reused in one minute
 	struct RudpItem{
 		bool sender;
 		Datagram * dat;
-		Timer resend_timer;
+		Timer timer;//used for both resend and ID reservation
 	};
 
 	class ReliableTracker {	
@@ -23,6 +24,7 @@ namespace GNET {
 		void HandlePacket(Datagram * dat);
 	private:
 		ReliableTable out;
+		ReliableTable in;
 		ReliableTableIter it;
 		Peer * peer;
 	};
