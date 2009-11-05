@@ -21,7 +21,7 @@ namespace GNET {
 		~ReliableTracker(){}
 		void Update();
 		void AddOutgoingPack(DataPack * pack, SOCKADDR_IN * remote);
-		void HandlePacket(Datagram * dat);
+		bool HandlePacket(Datagram * dat);
 	private:
 		ReliableTable out;
 		ReliableTable in;

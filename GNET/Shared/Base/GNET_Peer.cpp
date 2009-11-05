@@ -200,14 +200,17 @@ int Peer::logcThread(void) {
 
 			// If it's a data pack, put it on the buffer and we're done.
 			if (dynamic_cast<DataPack*>(data.pack)) {
-				game_recv_buffer.Lock();
-				game_recv_buffer->push(data);
-				game_recv_buffer.Pulse();
-				game_recv_buffer.Unlock();
+				bool should_proceed = true;
 				if (dynamic_cast<DataPack*>(data.pack)->reliable ==true)
 				{
-					printf("Received a reliable datapack with seq ID = %d\n", dynamic_cast<DataPack*>(data.pack)->seq_num);
-					rudpTracker.HandlePacket(&data);
+					should_proceed = rudpTracker.HandlePacket(&data);
+				}
+				if(should_proceed)
+				{
+					game_recv_buffer.Lock();
+					game_recv_buffer->push(data);
+					game_recv_buffer.Pulse();
+					game_recv_buffer.Unlock();
 				}
 			}
 			if(dynamic_cast<RUDPAckPack*>(data.pack)){
@@ -221,7 +224,6 @@ int Peer::logcThread(void) {
 				it = it_pair.first;
 				it->second->HandlePacket(&data);
 			}
-
 			recv_buffer.Lock();
 		}
 		recv_buffer.Unlock();
