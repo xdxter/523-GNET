@@ -3,8 +3,9 @@
 
 #include "stdafx.h"
 #include <iostream>
-#include "GNET_GamePacket.h"
-#include "GNET_Packet.h"
+#include <math.h>
+#include "Packets/GNET_GamePacket.h"
+#include "Packets/GNET_Packet.h"
 #include "GNET_Peer.h"
 
 using namespace GNET;
@@ -27,7 +28,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	//GNET startup
 	Peer *gnet;
 	gnet = new Peer();
-	gnet->Startup(1, LISTEN_PORT, 50);
+	gnet->Startup(1, (rand() % 1000) + 4000, 7);
 
 	// Connect to server
 	bool connected = gnet->Connect(SERVER_ADDY, SERVER_PORT, 3);
@@ -47,9 +48,11 @@ int _tmain(int argc, _TCHAR* argv[])
 
 		gnet->Send(CreateDataPack(&msg),&target);
 
+		while (true) {
 		// Receive a packet. Passing true in means that the call will block until one is received.
-		DataPack * p = gnet->Receive(true);
-		printf("Message Received: %s\n", static_cast<MsgPacket*>(p->game)->msg);
+			DataPack * p = gnet->Receive(true);
+			printf("Message Received: %s\n", static_cast<MsgPacket*>(p->game)->msg);
+		}
 	}
 
 	getchar();

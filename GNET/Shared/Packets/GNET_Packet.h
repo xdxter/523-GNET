@@ -18,7 +18,7 @@ namespace GNET {
 		GNET::PktReg pkt_data; T t;								\
 		pkt_data.size = sizeof(T);								\
 		pkt_data.instantiate = t.Instantiate;					\
-		MAP.insert(	PktRegPair(t.GetType(), pkt_data)); }
+		MAP.insert(	GNET::PktRegPair(t.GetType(), pkt_data)); }
 
 	#define PACKET_TYPE(NUM,T)								\
 		char GetType() { return NUM; }						\
@@ -31,7 +31,8 @@ namespace GNET {
 		SYN_PACKET,
 		ACK_PACKET,
 		DATA_PACKET,
-		MARCO_PACKET
+		MARCO_PACKET,
+		POLO_PACKET
 	};
 
 	struct INetPacket {
@@ -49,7 +50,7 @@ namespace GNET {
 		PACKET_TYPE(SYN_PACKET, SynPack);
 	};
 	struct AckPack : INetPacket
-	{
+	{		
 		PACKET_TYPE(ACK_PACKET, AckPack);
 	};
 
@@ -64,8 +65,11 @@ namespace GNET {
 	};
 	struct MarcoPack : INetPacket
 	{
-		unsigned int seq_num;
 		PACKET_TYPE(MARCO_PACKET, MarcoPack);
+	};
+	struct PoloPack : INetPacket
+	{
+		PACKET_TYPE(POLO_PACKET, PoloPack);
 	};
 #pragma pack(pop)
 
@@ -79,6 +83,7 @@ namespace GNET {
 			REGISTER_PACKET(SynPack,g_NetPackets);
 			REGISTER_PACKET(DataPack,g_NetPackets);
 			REGISTER_PACKET(MarcoPack,g_NetPackets);
+			REGISTER_PACKET(PoloPack,g_NetPackets);
 		}
 	};
 

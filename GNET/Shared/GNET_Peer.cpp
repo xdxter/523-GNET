@@ -2,7 +2,6 @@
 #include <map>
 #include "winsock2.h"
 #include "GNET_Peer.h"
-#include "Timer.h"
 
 #define MAX_PACKETSIZE 16
 
@@ -12,7 +11,10 @@ DWORD WINAPI runRecvThread(void* param) { return ((Peer*)param)->recvThread(); }
 DWORD WINAPI runSendThread(void* param) { return ((Peer*)param)->sendThread(); }
 DWORD WINAPI runLogcThread(void* param) { return ((Peer*)param)->logcThread(); }
 
-Peer::Peer(unsigned int max_packet_size)
+Peer::Peer(unsigned int max_packet_size) :
+	send_buffer(1000),
+	recv_buffer(1000),
+	game_recv_buffer(1000)
 {	
 	PacketEncoder::RegisterNetPackets();
 	this->max_packet_size = max_packet_size;
@@ -67,12 +69,14 @@ int Peer::Connect(char* ip, unsigned short port, unsigned int max_attempts, unsi
 	remote.sin_port = htons(port);
 	remote.sin_addr.S_un.S_addr = inet_addr(ip);
 	
-	if (connections.find(ADDR(remote)) != connections.end())
+	if (connections.find(SA2ULUS(remote)) != connections.end())
 		return 0;
 
 	Connection* c = new Connection(remote, this);
-	connections.insert( std::pair< ulus, Connection*>( ADDR(remote), c ) );
-	c->TryConnecting(max_attempts, timeout_ms);
+	connections.insert( std::pair< ulus, Connection*>( SA2ULUS(remote), c ) );
+
+	Turnkey<bool> connecting;
+	c->TryConnecting(max_attempts, timeout_ms, &connecting);
 
 	connecting.Wait();
 
@@ -110,6 +114,20 @@ DataPack* Peer::Receive(bool block, SOCKADDR_IN *sock) {
 		memcpy(sock, dgram->sock, sizeof(SOCKADDR_IN));		
 
 	return static_cast<DataPack*>(dgram->pack);
+}
+
+void Peer::Send(INetPacket *pack, IFilter *filter, bool reliable) 
+{
+	SOCKADDR_IN test;
+	for (ConnectionTable::iterator it = connections.begin(); 
+		it != connections.end(); it++) 
+	{
+		if (filter->ShouldSend(it->first)) {
+		ULUS2SA(it->first, test);
+		//if (filter->ShouldSend( &test ))
+			Send(pack, &test, reliable);
+		}
+	}
 }
 
 void Peer::Send(INetPacket *pack, SOCKADDR_IN *remote, bool reliable) 
@@ -195,11 +213,11 @@ int Peer::logcThread(void) {
 				game_recv_buffer.Unlock();
 			}
 
-			if (( it = connections.find( ADDR( *data.sock) )) != connections.end())
+			if (( it = connections.find( SA2ULUS( *data.sock) )) != connections.end())
 				it->second->HandlePacket(&data);
-			else if (dynamic_cast<ConPack*>(data.pack) && connections.size() < max_clients) {
+			else if (dynamic_cast<ConPack*>(data.pack) && connections.size() < (unsigned int)max_clients) {
 				std::pair<ConnectionTable::iterator,bool> it_pair = 
-					connections.insert( ConnectionTablePair( ADDR(*data.sock), new Connection(*data.sock, this)));
+					connections.insert( ConnectionTablePair( SA2ULUS(*data.sock), new Connection(*data.sock, this)));
 				it = it_pair.first;
 				it->second->HandlePacket(&data);
 			}
@@ -208,8 +226,11 @@ int Peer::logcThread(void) {
 		}
 		recv_buffer.Unlock();
 
-		for (it = connections.begin(); it != connections.end(); it++) {
-			it->second->Update();
+		for (it = connections.begin(); it != connections.end();) {
+			if (!it->second->Update()) 
+				connections.erase(it++);
+			else
+				it++;
 		}
 		pacing.WaitTillFinished();
 	}

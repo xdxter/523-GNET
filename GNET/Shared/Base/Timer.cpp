@@ -4,6 +4,7 @@ using namespace GNET;
 
 Timer::Timer(int ms_time) {
 	timer_max = ms_time;
+	clock_tic = -1;
 }
 
 void Timer::Reset() {

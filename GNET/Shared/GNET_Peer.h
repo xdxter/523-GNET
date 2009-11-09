@@ -1,17 +1,11 @@
-#include "GNET_Packet.h"
 #include "GNET_Types.h"
-#include "Connection.h"
-#include "Monitor.h"
-#include "Turnkey.h"
+#include "Connections/Connection.h"
+#include "Base/Monitor.h"
+#include "Base/Turnkey.h"
 
 #pragma once
 
 namespace GNET {
-#define ADDR( sa ) ulus( (sa).sin_addr.S_un.S_addr, (sa).sin_port)
-	typedef std::pair<unsigned long, unsigned short> ulus;
-	typedef std::pair<ulus, Connection*> ConnectionTablePair;
-	typedef std::map<ulus, Connection* > ConnectionTable;
-	typedef std::queue<Datagram> DgramBuffer;
 
 	class Peer {
 
@@ -24,6 +18,7 @@ namespace GNET {
 		int ListenForConnection(int max_clients = 1, unsigned int timeout_ms = 500);
 
 		DataPack* Receive(bool should_block, SOCKADDR_IN *sock = 0);
+		void Peer::Send(INetPacket *pack, IFilter *filter, bool reliable = false);
 		void Send(INetPacket *pack, SOCKADDR_IN *remote, bool reliable = false);
 
 		int recvThread(void);
@@ -32,11 +27,14 @@ namespace GNET {
 		SOCKET socketID;
 
 	protected:		
-		Turnkey<bool> connecting;
-		int connect_timeout;
+		friend class Connection;
 
-		friend class Connection;		
+		int connect_timeout;
+		Monitor<SockBuffer>	connection_events; 
+		Monitor<SockBuffer> disconnect_events;
+
 		void Send(Datagram *dat);
+
 	private:
 		int max_connections;
 		int max_clients;

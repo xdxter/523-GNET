@@ -1,4 +1,6 @@
-template<class T>
+#pragma once
+
+template<class T = bool>
 class Turnkey {
 	HANDLE control_semaphore;
 	T result;

@@ -3,16 +3,10 @@
 
 #include "stdafx.h"
 #include <iostream>
-#include "GNET_GamePacket.h"
-#include "GNET_Packet.h"
+#include "Packets/GNET_GamePacket.h"
+#include "Packets/GNET_Packet.h"
 #include "GNET_Peer.h"
-#include "Timer.h"
 
-#define __debug__ __tool__
-#define d(x) printf(#x);
-#define dd(x, fmt) printf("=====DEBUG====> Line %u: %s=" "%" #fmt "\n" , __LINE__, #x, x)
-#define ddd(extra, x, fmt) printf(#extra "     =====DEBUG====> Line %u: %s=" "%" #fmt "\n" , __LINE__, #x, x)
-#define dddd() printf("*************DEBUG*************\n")
 
 #pragma pack(push,1)
 struct MsgPacket : GNET::IGamePacket {
@@ -21,24 +15,30 @@ struct MsgPacket : GNET::IGamePacket {
 };
 #pragma pack(pop)
 
-using namespace GNET;
-
 int _tmain(int argc, _TCHAR* argv[])
 {
 	REGISTER_PACKET(MsgPacket, GNET::g_GamePackets);
-	Peer *gnet;
-	gnet = new Peer();
+	GNET::Peer *gnet;
+	gnet = new GNET::Peer();
 	gnet->Startup(5,4444,50);
-	gnet->ListenForConnection(1);
+	gnet->ListenForConnection(4);
 
 	SOCKADDR_IN remote;
 	while (true) {		
-		DataPack *dp = gnet->Receive(true, &remote);
+		GNET::DataPack *dp = gnet->Receive(true, &remote);
+
 		if (dp) {
-			ddd("Received message:",dynamic_cast<MsgPacket*>(dp->game)->msg,s);
+			printf("Received message from %d:%d -- %s", remote.sin_addr.S_un.S_addr, remote.sin_port,
+				static_cast<MsgPacket*>(dp->game)->msg);
+
+			// Reply to user
 			MsgPacket m;
 			strcpy(m.msg,"CANDLEJACK SAYS H-");
 			gnet->Send(CreateDataPack(&m), &remote, 1);
+
+			// Broadcast message to others
+			GNET::FilterEveryoneBut filter(&remote);
+			gnet->Send(dp, &filter, 1);
 		}
 	}
 	

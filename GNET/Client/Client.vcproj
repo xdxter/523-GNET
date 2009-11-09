@@ -43,7 +43,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(OutDir)&quot;;../Shared/Base/;../Shared/"
+				AdditionalIncludeDirectories="&quot;$(OutDir)&quot;;../Shared/"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;"
 				MinimalRebuild="false"
 				BasicRuntimeChecks="0"
@@ -160,66 +160,92 @@
 	</References>
 	<Files>
 		<Filter
-			Name="Header Files"
-			Filter=".h"
+			Name="Shared"
 			>
 			<File
-				RelativePath="..\Shared\Base\Connection.h"
+				RelativePath="..\Shared\GNET_Peer.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\Shared\Base\GNET_Packet.h"
+				RelativePath="..\Shared\GNET_Peer.h"
 				>
 			</File>
 			<File
-				RelativePath="..\Shared\Base\GNET_Peer.h"
+				RelativePath="..\Shared\GNET_Types.h"
 				>
 			</File>
-			<File
-				RelativePath="..\Shared\Base\Monitor.h"
+			<Filter
+				Name="Base"
 				>
-			</File>
-			<File
-				RelativePath="..\Shared\Base\Timer.h"
+				<File
+					RelativePath="..\Shared\Base\Monitor.h"
+					>
+				</File>
+				<File
+					RelativePath="..\Shared\Base\Timer.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\Shared\Base\Timer.h"
+					>
+				</File>
+				<File
+					RelativePath="..\Shared\Base\Turnkey.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Connections"
 				>
-			</File>
-			<File
-				RelativePath="..\Shared\Base\Turnkey.h"
+				<File
+					RelativePath="..\Shared\Connections\Connection.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\Shared\Connections\Connection.h"
+					>
+				</File>
+				<Filter
+					Name="Parts"
+					>
+					<File
+						RelativePath="..\Shared\Connections\Parts\ConnectProtocol.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\Shared\Connections\Parts\ConnectProtocol.h"
+						>
+					</File>
+					<File
+						RelativePath="..\Shared\Connections\Parts\Heartbeat.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\Shared\Connections\Parts\Heartbeat.h"
+						>
+					</File>
+				</Filter>
+			</Filter>
+			<Filter
+				Name="Packets"
 				>
-			</File>
-		</Filter>
-		<Filter
-			Name="Source Files"
-			Filter=".cpp"
-			>
-			<File
-				RelativePath="..\Shared\Base\Connection.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\Shared\Base\GamePackets.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\Shared\Base\GNET_GamePacket.h"
-				>
-			</File>
-			<File
-				RelativePath="..\Shared\Base\GNET_Peer.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\Shared\Base\GNET_Types.h"
-				>
-			</File>
-			<File
-				RelativePath="..\Shared\Base\Packet.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\Shared\Base\Timer.cpp"
-				>
-			</File>
+				<File
+					RelativePath="..\Shared\Packets\GNET_GamePacket.h"
+					>
+				</File>
+				<File
+					RelativePath="..\Shared\Packets\GNET_GamePackets.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\Shared\Packets\GNET_Packet.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\Shared\Packets\GNET_Packet.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<File
 			RelativePath=".\Using_GNET.txt"
