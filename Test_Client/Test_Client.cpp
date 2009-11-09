@@ -30,8 +30,8 @@ int _tmain(int argc, _TCHAR* argv[])
 	gnet->Startup(1, LISTEN_PORT, 50);
 
 	// Connect to server
-	//bool connected = gnet->Connect(SERVER_ADDY, SERVER_PORT, 3);
-	bool connected = true;
+	bool connected = gnet->Connect(SERVER_ADDY, SERVER_PORT, 3);
+	//bool connected = true;
 	if (!connected) {
 		printf("Failed to connect to server.\n");
 	} 

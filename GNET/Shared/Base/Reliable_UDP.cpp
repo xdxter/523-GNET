@@ -28,7 +28,7 @@ void ReliableTracker::AddOutgoingPack(DataPack * pack, SOCKADDR_IN * remote)
 	item->dat = dat;
 	item->sender = true;
 	item->timer.Reset(RUDP_TIMEOUT);
-	out[ReliableKey(ADDR(*remote), pack->seq_num)] = item;
+	out[pack->seq_num] = item;
 	printf("RUDP------>Added new outgoing packet....\n");
 }
 
@@ -37,16 +37,17 @@ bool ReliableTracker::HandlePacket(Datagram * dat)
 	if (dynamic_cast<DataPack*>(dat->pack))
 	{
 		printf("RUDP------>Received a reliable datapack with seq ID = %d from %d\n", dynamic_cast<DataPack*>(dat->pack)->seq_num, dat->sock->sin_port);
-		it = in.find(ReliableKey(ADDR(*dat->sock), dynamic_cast<DataPack*>(dat->pack)->seq_num));
+		it = in.find(dynamic_cast<DataPack*>(dat->pack)->seq_num);
 
 		//A repetitive datapack or it hasn't been 1 min since this ID is used
 		if (it != in.end())	
 		{
+			//resend Ack packet
 			RUDPAckPack ackPack;
 			ackPack.seq_num = dynamic_cast<DataPack*>(dat->pack)->seq_num;
-			peer->Send(&ackPack, dat->sock);	//resend rudp ack for this packet
+			peer->Send(&ackPack, dat->sock);
 			printf("RUDP------>Received repetitive packet, decide to abandon.....\n");
-			return false;						//tell logc_thread to not proceed a repetitive packet
+			return false;		//tell logc_thread to not proceed a repetitive packet
 		}
 		// new rudp packet
 		else			
@@ -57,7 +58,7 @@ bool ReliableTracker::HandlePacket(Datagram * dat)
 
 			RUDPAckPack ackPack;
 			ackPack.seq_num = dynamic_cast<DataPack*>(dat->pack)->seq_num;
-			in[ReliableKey(ADDR(*dat->sock), ackPack.seq_num)] = item;
+			in[ackPack.seq_num] = item;
 			printf("RUDP------>Sending Rudp Ack for received packet %d......\n", ackPack.seq_num);
 			peer->Send(&ackPack, dat->sock);
 			return true;
@@ -66,10 +67,10 @@ bool ReliableTracker::HandlePacket(Datagram * dat)
 	else if(dynamic_cast<RUDPAckPack*>(dat->pack))
 	{
 		RUDPAckPack * pack = dynamic_cast<RUDPAckPack*>(dat->pack);
-		it = out.find(ReliableKey(ADDR(*dat->sock), pack->seq_num));
-		if(it != in.end())	//if this ACK is recognized
+		it = out.find(pack->seq_num);
+		if(it != out.end())	//if this ACK is recognized
 		{
-			printf("Rudp Ack for packet %d has been received, removing it...\n", pack->seq_num);
+			printf("RUDP--->Ack for packet %d has been received, removing it...\n", pack->seq_num);
 			out.erase(it);
 		}
 	}

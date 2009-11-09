@@ -32,9 +32,8 @@ namespace GNET {
 
 	//reliable udp map
 	//typedef std::pair<bool, unsigned int> boui;
-	typedef std::pair<ulus, int> ReliableKey;
-	typedef std::pair<ReliableKey, RudpItem*> ReliableTablePair;
-	typedef std::map<ReliableKey, RudpItem*> ReliableTable;
-	typedef std::map<ReliableKey, RudpItem*>::iterator ReliableTableIter;
+	typedef std::pair<int, RudpItem*> ReliableTablePair;
+	typedef std::map<int, RudpItem*> ReliableTable;
+	typedef std::map<int, RudpItem*>::iterator ReliableTableIter;
 
 }

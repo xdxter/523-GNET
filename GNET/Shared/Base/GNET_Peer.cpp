@@ -13,7 +13,7 @@ DWORD WINAPI runRecvThread(void* param) { return ((Peer*)param)->recvThread(); }
 DWORD WINAPI runSendThread(void* param) { return ((Peer*)param)->sendThread(); }
 DWORD WINAPI runLogcThread(void* param) { return ((Peer*)param)->logcThread(); }
 
-Peer::Peer(unsigned int max_packet_size):rudpTracker(this)
+Peer::Peer(unsigned int max_packet_size)
 {	
 	PacketEncoder::RegisterNetPackets();
 	this->max_packet_size = max_packet_size;
@@ -53,7 +53,7 @@ int Peer::Startup(int max_connections, unsigned short port, int sleep_time)
 	hostAddr.sin_family = AF_INET;
 	hostAddr.sin_port = htons(port);
 	hostAddr.sin_addr.S_un.S_addr = htonl(INADDR_ANY);
-	
+
 	bind(this->socketID, (SOCKADDR*)&hostAddr, sizeof(SOCKADDR));
 
 	CreateThread(NULL, 0, runRecvThread, this, 0, NULL);
@@ -68,7 +68,7 @@ int Peer::Connect(char* ip, unsigned short port, unsigned int max_attempts, unsi
 	remote.sin_family = AF_INET;
 	remote.sin_port = htons(port);
 	remote.sin_addr.S_un.S_addr = inet_addr(ip);
-	
+
 	if (connections.find(ADDR(remote)) != connections.end())
 		return 0;
 
@@ -116,11 +116,17 @@ DataPack* Peer::Receive(bool block, SOCKADDR_IN *sock) {
 
 void Peer::Send(INetPacket *pack, SOCKADDR_IN *remote, bool reliable) 
 {	
-	//handle reliable udp send
+
 	if (reliable){
-		dynamic_cast<DataPack*>(pack)->reliable = true;
-		dynamic_cast<DataPack*>(pack)->seq_num = this->incremental_seq_id++;
-		rudpTracker.AddOutgoingPack(dynamic_cast<DataPack*>(pack), remote);
+		ConnectionTable::iterator it;
+		if (( it = connections.find( ADDR(*remote) )) != connections.end())
+		{
+
+			//handle reliable udp send
+			dynamic_cast<DataPack*>(pack)->reliable = true;
+			dynamic_cast<DataPack*>(pack)->seq_num = this->incremental_seq_id++;
+			//it->second->rudpTracker->AddOutgoingPack(dynamic_cast<DataPack*>(pack), remote);
+		}
 	}
 	else if (dynamic_cast<DataPack*>(pack)){
 		dynamic_cast<DataPack*>(pack)->reliable = false;
@@ -195,28 +201,10 @@ int Peer::logcThread(void) {
 
 			Datagram data = recv_buffer->front();
 			recv_buffer->pop();
-
 			recv_buffer.Unlock();
 
 			// If it's a data pack, put it on the buffer and we're done.
-			if (dynamic_cast<DataPack*>(data.pack)) {
-				bool should_proceed = true;
-				if (dynamic_cast<DataPack*>(data.pack)->reliable ==true)
-				{
-					should_proceed = rudpTracker.HandlePacket(&data);
-				}
-				if(should_proceed)
-				{
-					game_recv_buffer.Lock();
-					game_recv_buffer->push(data);
-					game_recv_buffer.Pulse();
-					game_recv_buffer.Unlock();
-				}
-			}
-			if(dynamic_cast<RUDPAckPack*>(data.pack)){
-				rudpTracker.HandlePacket(&data);
-			}
-			else if (( it = connections.find( ADDR( *data.sock) )) != connections.end())
+			if (( it = connections.find( ADDR( *data.sock) )) != connections.end())
 				it->second->HandlePacket(&data);
 			else if (dynamic_cast<ConPack*>(data.pack) && connections.size() < max_clients) {
 				std::pair<ConnectionTable::iterator,bool> it_pair = 
@@ -231,7 +219,6 @@ int Peer::logcThread(void) {
 		for (it = connections.begin(); it != connections.end(); it++) {
 			it->second->Update();
 		}
-		rudpTracker.Update();
 		pacing.WaitTillFinished();
 	}
 

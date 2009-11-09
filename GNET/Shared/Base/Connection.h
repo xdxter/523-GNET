@@ -27,6 +27,7 @@ namespace GNET {
 		bool is_instigator;
 		int attempts;
 		int ms_delay;
+		ReliableTracker * rudpTracker;	//reliable udp controller
 
 		void Handshake(int i);
 	};

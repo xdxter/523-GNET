@@ -30,6 +30,7 @@ namespace GNET {
 	protected:		
 		Turnkey<bool> connecting;
 		int connect_timeout;
+		Monitor<DgramBuffer> game_recv_buffer;
 
 		friend class Connection;		
 		friend class ReliableTracker;
@@ -43,11 +44,8 @@ namespace GNET {
 
 		Monitor<DgramBuffer> send_buffer;
 		Monitor<DgramBuffer> recv_buffer;
-		
-		Monitor<DgramBuffer> game_recv_buffer;
 
 		ConnectionTable connections;
-		ReliableTracker rudpTracker;	//reliable udp controller
 
 		HANDLE recv_thread;
 		HANDLE send_thread;

@@ -29,16 +29,16 @@ int _tmain(int argc, _TCHAR* argv[])
 	Peer *gnet;
 	gnet = new Peer();
 	gnet->Startup(5,4444,50);
-	gnet->ListenForConnection(1);
+	gnet->ListenForConnection(5);
 
 	SOCKADDR_IN remote;
 	while (true) {		
 		DataPack *dp = gnet->Receive(true, &remote);
 		if (dp) {
 			printf("Received message: %s\n", dynamic_cast<MsgPacket*>(dp->game)->msg);
-			//MsgPacket m;
-			//strcpy(m.msg,"CANDLEJACK SAYS HI");
-			//gnet->Send(CreateDataPack(&m), &remote, 1);
+			MsgPacket m;
+			strcpy(m.msg,"CANDLEJACK SAYS HI");
+			gnet->Send(CreateDataPack(&m), &remote, 1);
 		}
 	}
 	

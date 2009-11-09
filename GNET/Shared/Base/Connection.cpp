@@ -19,6 +19,7 @@ enum {
 Connection::Connection(SOCKADDR_IN remote, Peer* peer) {
 	this->remote = remote;
 	this->peer = peer;
+	this->rudpTracker = new ReliableTracker(peer);
 	seq_num_out = 0;
 
 	is_instigator = false;
@@ -41,7 +42,7 @@ void Connection::Handshake(int i) {
 	peer->Send(
 		(i == SEND_CON? (INetPacket*) new ConPack :
 		(i == SEND_SYN? (INetPacket*) new SynPack :
-							   new AckPack)),
+		new AckPack)),
 		&remote,false);
 	// Set to wait for Syn
 	connect_timer.Reset(ms_delay);
@@ -63,11 +64,31 @@ void Connection::Update() {
 
 		}
 	}
-
+	rudpTracker->Update();
 	// Run down RUDP timers, send ACK1's
 }
 
 bool Connection::HandlePacket(Datagram *data) {
+
+	//if received a datapack
+	if (dynamic_cast<DataPack*>(data->pack)) {
+		bool should_proceed = true;
+		if (dynamic_cast<DataPack*>(data->pack)->reliable ==true)
+		{
+			should_proceed = rudpTracker->HandlePacket(data);
+			if(should_proceed)
+			{
+				peer->game_recv_buffer.Lock();
+				peer->game_recv_buffer->push(*data);
+				peer->game_recv_buffer.Pulse();
+				peer->game_recv_buffer.Unlock();
+			}
+		}
+	}	
+	else if(dynamic_cast<RUDPAckPack*>(data->pack)){
+		rudpTracker->HandlePacket(data);
+	}
+
 	if (is_instigator) {
 		if (dynamic_cast<SynPack*>(data->pack)) {
 			if (connect_state == WAITING_FOR_SYN) {
@@ -93,12 +114,6 @@ bool Connection::HandlePacket(Datagram *data) {
 			return true;
 		}
 	}
-
-	// RUDP stuff
-	if (data->reliable) {
-		// if it's an ACK2, we finished something
-		// otherwise, we need to send an ACK1...
-	}	
 }
 
 int Connection::Seq_Num() {
