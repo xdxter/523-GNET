@@ -8,7 +8,8 @@ using namespace GNET;
 #pragma warning(disable:4355) // we know what we're doing with 'this'
 Connection::Connection(SOCKADDR_IN remote, Peer* peer) : 
 	heartbeat(5000, 500, 4, peer, this),
-	connectprotocol(peer->connect_timeout, peer, this)
+	connectprotocol(peer->connect_timeout, peer, this),
+	rudpTracker(peer)
 {
 	this->remote = remote;
 	this->peer = peer;
@@ -23,6 +24,7 @@ bool Connection::Update() {
 
 	if (!should_disconnect)	connectprotocol.Update();
 	if (!should_disconnect)	heartbeat.Update();
+	if (!should_disconnect) rudpTracker.Update();
 
 	// return true if connection is still alive
 	return !should_disconnect;
@@ -38,6 +40,7 @@ bool Connection::HandlePacket(Datagram *data) {
 	bool handled = false;
 	if (!handled) handled = connectprotocol.HandlePacket(data);
 	if (!handled) handled = heartbeat.HandlePacket(data);
+	if (!handled) handled = rudpTracker.HandlePacket(data);
 	
 	// this will return true if the packet has been handled
 	return handled; 

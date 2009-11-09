@@ -45,9 +45,9 @@ INetPacket* PacketEncoder::DecodePacket(char* buffer, int i) {
 		}
 		return pack;
 	}
-	
+
 	PktRegMap::iterator it;
-	if ((it = g_NetPackets.find(*buffer)) != g_NetPackets.end()) {
+	if ((it = g_NetPackets.find(buffer[i++])) != g_NetPackets.end()) {
 		PktReg *pkt = &(it->second);
 		INetPacket *pack = static_cast<INetPacket*>(pkt->instantiate());
 		i += copyout(buffer, i, (char*)pack, pkt->size, sizeof(INetPacket));

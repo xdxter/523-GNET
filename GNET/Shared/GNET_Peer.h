@@ -28,6 +28,7 @@ namespace GNET {
 
 	protected:		
 		friend class Connection;
+		friend class ReliableTracker;
 
 		int connect_timeout;
 		Monitor<SockBuffer>	connection_events; 

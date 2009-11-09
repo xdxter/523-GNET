@@ -5,6 +5,7 @@
 
 #include "Connections/Parts/Heartbeat.h"
 #include "Connections/Parts/ConnectProtocol.h"
+#include "Connections/Parts/ReliableUdp.h"
 
 
 #pragma once
@@ -23,9 +24,13 @@ namespace GNET {
 		void TryConnecting(int max_attempts, int ms_delay, Turnkey<bool> *key);
 		int Seq_Num();
 
+		//temporary design
+		inline void TrackRudpPacket(DataPack * pack, SOCKADDR_IN * sock){ rudpTracker.AddOutgoingPack(pack, sock);}
+
 	protected:
 		friend Heartbeat;
 		friend ConnectProtocol;
+		friend ReliableTracker;
 
 		void Disconnect();
 
@@ -34,6 +39,7 @@ namespace GNET {
 
 		Heartbeat heartbeat;
 		ConnectProtocol connectprotocol;
+		ReliableTracker rudpTracker;
 
 		int seq_num_out;
 		bool should_disconnect;

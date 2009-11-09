@@ -12,9 +12,9 @@ DWORD WINAPI runSendThread(void* param) { return ((Peer*)param)->sendThread(); }
 DWORD WINAPI runLogcThread(void* param) { return ((Peer*)param)->logcThread(); }
 
 Peer::Peer(unsigned int max_packet_size) :
-	send_buffer(1000),
-	recv_buffer(1000),
-	game_recv_buffer(1000)
+send_buffer(1000),
+recv_buffer(1000),
+game_recv_buffer(1000)
 {	
 	PacketEncoder::RegisterNetPackets();
 	this->max_packet_size = max_packet_size;
@@ -53,7 +53,7 @@ int Peer::Startup(int max_connections, unsigned short port, int sleep_time)
 	hostAddr.sin_family = AF_INET;
 	hostAddr.sin_port = htons(port);
 	hostAddr.sin_addr.S_un.S_addr = htonl(INADDR_ANY);
-	
+
 	bind(this->socketID, (SOCKADDR*)&hostAddr, sizeof(SOCKADDR));
 
 	CreateThread(NULL, 0, runRecvThread, this, 0, NULL);
@@ -68,7 +68,7 @@ int Peer::Connect(char* ip, unsigned short port, unsigned int max_attempts, unsi
 	remote.sin_family = AF_INET;
 	remote.sin_port = htons(port);
 	remote.sin_addr.S_un.S_addr = inet_addr(ip);
-	
+
 	if (connections.find(SA2ULUS(remote)) != connections.end())
 		return 0;
 
@@ -118,20 +118,38 @@ DataPack* Peer::Receive(bool block, SOCKADDR_IN *sock) {
 
 void Peer::Send(INetPacket *pack, IFilter *filter, bool reliable) 
 {
-	SOCKADDR_IN test;
+	SOCKADDR_IN addr;
 	for (ConnectionTable::iterator it = connections.begin(); 
 		it != connections.end(); it++) 
 	{
 		if (filter->ShouldSend(it->first)) {
-		ULUS2SA(it->first, test);
-		//if (filter->ShouldSend( &test ))
-			Send(pack, &test, reliable);
+			ULUS2SA(it->first, addr);
+			Send(pack, &addr, reliable);
 		}
 	}
 }
 
 void Peer::Send(INetPacket *pack, SOCKADDR_IN *remote, bool reliable) 
 {	
+
+	ConnectionTable::iterator it = connections.find(SA2ULUS(*remote));
+	if(it != connections.end())
+	{
+		if (dynamic_cast<DataPack*>(pack))
+		{
+			if(reliable)
+			{
+				dynamic_cast<DataPack*>(pack)->reliable = true;
+				dynamic_cast<DataPack*>(pack)->seq_num = it->second->Seq_Num();
+				it->second->TrackRudpPacket(dynamic_cast<DataPack*>(pack), remote);
+			}
+			else
+			{
+				dynamic_cast<DataPack*>(pack)->reliable = false;
+			}
+		}
+	}
+
 	Datagram dat;
 	dat.reliable = reliable;
 	dat.sock = new SOCKADDR_IN(*remote);
@@ -205,21 +223,29 @@ int Peer::logcThread(void) {
 
 			recv_buffer.Unlock();
 
-			// If it's a data pack, put it on the buffer and we're done.
-			if (dynamic_cast<DataPack*>(data.pack)) {
-				game_recv_buffer.Lock();
-				game_recv_buffer->push(data);
-				game_recv_buffer.Pulse();
-				game_recv_buffer.Unlock();
-			}
-
+			//TODO: not a speed-optimized way of handling packet
+			bool handled;
 			if (( it = connections.find( SA2ULUS( *data.sock) )) != connections.end())
-				it->second->HandlePacket(&data);
-			else if (dynamic_cast<ConPack*>(data.pack) && connections.size() < (unsigned int)max_clients) {
-				std::pair<ConnectionTable::iterator,bool> it_pair = 
-					connections.insert( ConnectionTablePair( SA2ULUS(*data.sock), new Connection(*data.sock, this)));
-				it = it_pair.first;
-				it->second->HandlePacket(&data);
+				handled = it->second->HandlePacket(&data);
+			if (!handled)
+			{
+				// If it's an unprocessed data pack, put it on the buffer and we're done.
+				if (dynamic_cast<DataPack*>(data.pack)) {
+					game_recv_buffer.Lock();
+					game_recv_buffer->push(data);
+					game_recv_buffer.Pulse();
+					game_recv_buffer.Unlock();
+					handled = true;
+				}
+			}
+			if(!handled)
+			{
+				if (dynamic_cast<ConPack*>(data.pack) && connections.size() < (unsigned int)max_clients) {
+					std::pair<ConnectionTable::iterator,bool> it_pair = 
+						connections.insert( ConnectionTablePair( SA2ULUS(*data.sock), new Connection(*data.sock, this)));
+					it = it_pair.first;
+					it->second->HandlePacket(&data);
+				}
 			}
 
 			recv_buffer.Lock();

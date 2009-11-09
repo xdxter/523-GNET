@@ -9,7 +9,7 @@
 #define DEBUG
 #ifdef DEBUG
 #include <iostream>
-#define dd(x) std::cout << x << "\n";//endl;
+#define dd(x) std::cout << x << "\n";
 #else
 #define dd(x) 
 #endif
@@ -18,6 +18,7 @@
 namespace GNET {
 
 	class Connection;
+	struct RudpItem;
 
 	//common
 	#define SA2ULUS( sa ) ulus( (sa).sin_addr.S_un.S_addr, (sa).sin_port)
@@ -54,4 +55,10 @@ namespace GNET {
 	typedef std::queue<Datagram> DgramBuffer;
 	
 	typedef std::vector<SOCKADDR_IN> SockBuffer;
+
+
+	//reliable udp map
+	typedef std::pair<int, RudpItem*> ReliableTablePair;
+	typedef std::map<int, RudpItem*> ReliableTable;
+	typedef std::map<int, RudpItem*>::iterator ReliableTableIter;
 }

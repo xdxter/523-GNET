@@ -224,6 +224,14 @@
 						RelativePath="..\Shared\Connections\Parts\Heartbeat.h"
 						>
 					</File>
+					<File
+						RelativePath="..\Shared\Connections\Parts\ReliableUdp.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\Shared\Connections\Parts\ReliableUdp.h"
+						>
+					</File>
 				</Filter>
 			</Filter>
 			<Filter

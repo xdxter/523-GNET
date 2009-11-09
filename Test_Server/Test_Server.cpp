@@ -34,7 +34,7 @@ int _tmain(int argc, _TCHAR* argv[])
 			// Reply to user
 			MsgPacket m;
 			strcpy(m.msg,"CANDLEJACK SAYS H-");
-			gnet->Send(CreateDataPack(&m), &remote, 1);
+			gnet->Send(CreateDataPack(&m), &remote, true);
 
 			// Broadcast message to others
 			GNET::FilterEveryoneBut filter(&remote);

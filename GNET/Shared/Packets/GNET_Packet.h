@@ -32,7 +32,8 @@ namespace GNET {
 		ACK_PACKET,
 		DATA_PACKET,
 		MARCO_PACKET,
-		POLO_PACKET
+		POLO_PACKET,
+		RUDP_ACK_PACKET = 33
 	};
 
 	struct INetPacket {
@@ -56,6 +57,7 @@ namespace GNET {
 
 	struct DataPack : INetPacket
 	{
+		bool reliable;
 		unsigned int seq_num;
 		IGamePacket* game;
 		virtual ~DataPack() {
@@ -71,6 +73,11 @@ namespace GNET {
 	{
 		PACKET_TYPE(POLO_PACKET, PoloPack);
 	};
+	struct RudpAckPack : INetPacket
+	{
+		int seq_num;
+		PACKET_TYPE(RUDP_ACK_PACKET, RudpAckPack);
+	};
 #pragma pack(pop)
 
 	class PacketEncoder {
@@ -84,6 +91,7 @@ namespace GNET {
 			REGISTER_PACKET(DataPack,g_NetPackets);
 			REGISTER_PACKET(MarcoPack,g_NetPackets);
 			REGISTER_PACKET(PoloPack,g_NetPackets);
+			REGISTER_PACKET(RudpAckPack,g_NetPackets);
 		}
 	};
 

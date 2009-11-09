@@ -19,7 +19,7 @@ struct MsgPacket : GNET::IGamePacket {
 
 #define LISTEN_PORT 3333
 #define SERVER_PORT 4444
-#define SERVER_ADDY "10.0.1.6"
+#define SERVER_ADDY "127.0.0.1"
 
 int _tmain(int argc, _TCHAR* argv[])
 {
@@ -46,7 +46,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		target.sin_family = AF_INET;
 		target.sin_port = htons(SERVER_PORT);
 
-		gnet->Send(CreateDataPack(&msg),&target);
+		gnet->Send(CreateDataPack(&msg),&target, true);
 
 		while (true) {
 		// Receive a packet. Passing true in means that the call will block until one is received.
