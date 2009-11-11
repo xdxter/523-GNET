@@ -25,7 +25,11 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	SOCKADDR_IN remote;
 	while (true) {		
+		//Comment this line if using Packet Simulator (Delay)
 		GNET::DataPack *dp = gnet->Receive(true, &remote);
+
+		//Call this to Simulate the Packet Simulator Receive
+		//GNET::DataPack *dp = gnet->PackLossSimulatorReceive(true, &remote, 0);//Receive(true, &remote);
 
 		if (dp) {
 			printf("Received message from %d:%d -- %s", remote.sin_addr.S_un.S_addr, remote.sin_port,

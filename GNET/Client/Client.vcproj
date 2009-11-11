@@ -163,6 +163,14 @@
 			Name="Shared"
 			>
 			<File
+				RelativePath="..\Shared\GNET_Compression.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\Shared\GNET_Compression.h"
+				>
+			</File>
+			<File
 				RelativePath="..\Shared\GNET_Peer.cpp"
 				>
 			</File>

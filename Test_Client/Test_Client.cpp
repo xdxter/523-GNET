@@ -46,7 +46,14 @@ int _tmain(int argc, _TCHAR* argv[])
 		target.sin_family = AF_INET;
 		target.sin_port = htons(SERVER_PORT);
 
-		gnet->Send(CreateDataPack(&msg),&target, true);
+		//Comment this while using the simulation of Dropping packets
+		gnet->Send(CreateDataPack(&msg),&target);
+		
+		//Uncomment this for using the Simulation of Dropping Packets
+		/*while(true)
+		{
+			gnet->NSimulatorSend(CreateDataPack(&msg),&target);
+		}*/
 
 		while (true) {
 		// Receive a packet. Passing true in means that the call will block until one is received.

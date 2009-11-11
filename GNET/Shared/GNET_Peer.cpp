@@ -2,6 +2,7 @@
 #include <map>
 #include "winsock2.h"
 #include "GNET_Peer.h"
+#include "GNET_Compression.h"
 
 #define MAX_PACKETSIZE 16
 
@@ -89,6 +90,17 @@ int Peer::ListenForConnection(int max_clients, unsigned int timeout_ms) {
 	return 1;
 }
 
+//Receive Taking packets only according to delay
+DataPack* Peer::PackLossSimulatorReceive(bool block, SOCKADDR_IN *sock, int delay)
+{
+	
+	Timer check_time(delay);
+	check_time.WaitTillFinished();
+	
+			DataPack *dp = Receive(block, sock);
+			return dp;
+	
+}
 DataPack* Peer::Receive(bool block, SOCKADDR_IN *sock) {
 	game_recv_buffer.Lock();
 	if (block) {
@@ -127,6 +139,25 @@ void Peer::Send(INetPacket *pack, IFilter *filter, bool reliable)
 			Send(pack, &addr, reliable);
 		}
 	}
+}
+
+//Added a function to drop the packets which the user gives to send
+static int delay1;
+static int delay2;
+
+void Peer::NSimulatorSend(INetPacket *pack, SOCKADDR_IN *remote, bool reliable)
+{
+
+	delay1 = rand()%60000+1;
+	delay2 = rand()%10+1;
+	
+	if(delay1==999 && delay2==4)
+	{
+		Send(pack,remote);
+	}
+	//Randomly Dropping Packets
+
+
 }
 
 void Peer::Send(INetPacket *pack, SOCKADDR_IN *remote, bool reliable) 
@@ -169,9 +200,29 @@ void Peer::Send(Datagram *dat)
 int Peer::recvThread(void) {
 	char buff[1024];
 	SOCKADDR remote;
+	compression dd;
 	int len = sizeof(SOCKADDR);
 	while (true) {
 		int recv = recvfrom(this->socketID, buff, 1024, 0, &remote, &len);
+		////add compression
+		//char *output=new char[1024];
+		//int outputsize=1024;
+		//char* ptr=buff;
+		//if(*ptr==1)	//compressed
+		//{
+		//	int aa=dd.decomp(ptr+1,output,outputsize);
+		//	if (aa==-1)	//output is not large enough
+		//	{
+		//		delete output;
+		//		output= new char[outputsize];
+		//		aa=dd.decomp(ptr+1,output,outputsize);
+		//	}
+		//}
+		//else		//uncompressed
+		//{
+		//	memcpy(output,buff+1,1023);
+		//}
+		////finish
 		INetPacket* packet = PacketEncoder::DecodePacket(buff);
 		Datagram dat;
 		SOCKADDR_IN *sock = new SOCKADDR_IN( *((SOCKADDR_IN*)&remote));
@@ -182,12 +233,14 @@ int Peer::recvThread(void) {
 		recv_buffer->push(dat);
 		recv_buffer.Pulse();
 		recv_buffer.Unlock();
+		//delete output;
 	}
 	return 0; 
 }
 
 int Peer::sendThread(void) {
 	send_buffer.Lock();
+	compression dd;
 	while (true) {
 		send_buffer.Wait();
 
@@ -199,8 +252,36 @@ int Peer::sendThread(void) {
 
 		int size = PacketEncoder::EncodePacket( data.pack, buffer, 1024 );
 
+		//char *output=new char[1024];
+		//int outputsize=1024;
+		//int length;
+		//char* ptr=buffer;
+		////add compression
+		//length=dd.comp(buffer,size,output,outputsize);
+		//if (length==-1)	//output is not enough
+		//{
+		//	delete output;
+		//	output= new char[outputsize];
+		//	length=dd.comp(buffer,size,output,outputsize);
+		//}
+		//if(length<size)	//worth compress
+		//{
+		//	length++;
+		//	memcpy(output+1,output,length);
+		//	*output=1;
+		//}
+		//else			//don't compress
+		//{
+		//	*output=0;
+		//	length=size+1;
+		//	if(length>1024) length=1024;
+		//	memcpy(output+1,ptr,length);
+		//	
+		//}
+		//finish	
 		sendto(this->socketID, buffer, size, 0, (SOCKADDR *)data.sock, sizeof(SOCKADDR));
 		send_buffer.Lock();
+		//delete output;
 	}
 
 	return 0;
@@ -223,29 +304,24 @@ int Peer::logcThread(void) {
 
 			recv_buffer.Unlock();
 
-			//TODO: not a speed-optimized way of handling packet
-			bool handled;
-			if (( it = connections.find( SA2ULUS( *data.sock) )) != connections.end())
-				handled = it->second->HandlePacket(&data);
-			if (!handled)
-			{
-				// If it's an unprocessed data pack, put it on the buffer and we're done.
-				if (dynamic_cast<DataPack*>(data.pack)) {
-					game_recv_buffer.Lock();
-					game_recv_buffer->push(data);
-					game_recv_buffer.Pulse();
-					game_recv_buffer.Unlock();
-					handled = true;
+
+			it = connections.find(SA2ULUS(*data.sock));
+
+			if (it != connections.end()) {
+				if (!it->second->HandlePacket(&data)) {
+					if (dynamic_cast<DataPack*>(data.pack)) {
+						game_recv_buffer.Lock();
+						game_recv_buffer->push(data);
+						game_recv_buffer.Pulse();
+						game_recv_buffer.Unlock();
+					}
 				}
-			}
-			if(!handled)
-			{
-				if (dynamic_cast<ConPack*>(data.pack) && connections.size() < (unsigned int)max_clients) {
+			} else if (dynamic_cast<ConPack*>(data.pack) && connections.size() < (unsigned int)max_clients) {
 					std::pair<ConnectionTable::iterator,bool> it_pair = 
 						connections.insert( ConnectionTablePair( SA2ULUS(*data.sock), new Connection(*data.sock, this)));
-					it = it_pair.first;
-					it->second->HandlePacket(&data);
-				}
+					if (it_pair.second) 
+						it_pair.first->second->HandlePacket(&data);
+				
 			}
 
 			recv_buffer.Lock();

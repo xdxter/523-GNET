@@ -33,7 +33,7 @@ namespace GNET {
 		DATA_PACKET,
 		MARCO_PACKET,
 		POLO_PACKET,
-		RUDP_ACK_PACKET = 33
+		RUDP_ACK_PACKET
 	};
 
 	struct INetPacket {

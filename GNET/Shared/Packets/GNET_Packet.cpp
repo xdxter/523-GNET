@@ -33,9 +33,10 @@ int PacketEncoder::EncodePacket(INetPacket* pack, char* buffer, int maxsize, int
 
 INetPacket* PacketEncoder::DecodePacket(char* buffer, int i) {
 	// The complicated one...
-	if (*buffer == DATA_PACKET) {
+	if (buffer[i] == DATA_PACKET) {
 		DataPack *pack = new DataPack;
 		i += copyout(buffer, ++i, (char*)pack, sizeof(DataPack) - sizeof(IGamePacket*), sizeof(INetPacket));
+
 		int game_packet_type = buffer[i++];
 		PktRegMap::iterator it;
 		if ((it = g_GamePackets.find(game_packet_type)) != g_GamePackets.end()) {
@@ -47,10 +48,10 @@ INetPacket* PacketEncoder::DecodePacket(char* buffer, int i) {
 	}
 
 	PktRegMap::iterator it;
-	if ((it = g_NetPackets.find(buffer[i++])) != g_NetPackets.end()) {
+	if ((it = g_NetPackets.find(buffer[i])) != g_NetPackets.end()) {
 		PktReg *pkt = &(it->second);
 		INetPacket *pack = static_cast<INetPacket*>(pkt->instantiate());
-		i += copyout(buffer, i, (char*)pack, pkt->size, sizeof(INetPacket));
+		i += copyout(buffer, ++i, (char*)pack, pkt->size, sizeof(INetPacket));
 		return pack;
 	}
 

@@ -21,6 +21,10 @@ namespace GNET {
 		void Peer::Send(INetPacket *pack, IFilter *filter, bool reliable = false);
 		void Send(INetPacket *pack, SOCKADDR_IN *remote, bool reliable = false);
 
+		//test funcs by aapte
+		void NSimulatorSend(INetPacket *pack, SOCKADDR_IN *remote, bool reliable = false);
+		DataPack* PackLossSimulatorReceive(bool should_block, SOCKADDR_IN *sock = 0, int delay = 0);
+
 		int recvThread(void);
 		int sendThread(void);
 		int logcThread(void);
