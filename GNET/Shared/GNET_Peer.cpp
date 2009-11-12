@@ -168,15 +168,11 @@ void Peer::Send(INetPacket *pack, SOCKADDR_IN *remote, char FLAGS)
 	{
 		if (dynamic_cast<DataPack*>(pack))
 		{
-			if(FLAGS & SendOptions::Reliable)
+			dynamic_cast<DataPack*>(pack)->flags = FLAGS;
+			if(FLAGS & RELIABLE)
 			{
-				dynamic_cast<DataPack*>(pack)->reliable = true;
 				dynamic_cast<DataPack*>(pack)->seq_num = it->second->Seq_Num();
 				it->second->TrackRudpPacket(dynamic_cast<DataPack*>(pack), remote);
-			}
-			else
-			{
-				dynamic_cast<DataPack*>(pack)->reliable = false;
 			}
 		}
 	}

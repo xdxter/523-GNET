@@ -47,7 +47,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		target.sin_port = htons(SERVER_PORT);
 
 		//Comment this while using the simulation of Dropping packets
-		gnet->Send(CreateDataPack(&msg),&target, Reliable);
+		gnet->Send(CreateDataPack(&msg),&target, RELIABLE | SEQUENCED);
 		
 		//Uncomment this for using the Simulation of Dropping Packets
 		/*while(true)

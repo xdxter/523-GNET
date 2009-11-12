@@ -57,7 +57,7 @@ namespace GNET {
 
 	struct DataPack : INetPacket
 	{
-		bool reliable;
+		char flags;
 		unsigned int seq_num;
 		IGamePacket* game;
 		virtual ~DataPack() {

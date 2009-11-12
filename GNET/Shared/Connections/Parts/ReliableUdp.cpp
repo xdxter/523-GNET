@@ -33,7 +33,7 @@ void ReliableTracker::AddOutgoingPack(DataPack * pack, SOCKADDR_IN * remote)
 bool ReliableTracker::HandlePacket(Datagram * dat)
 {
 	DataPack* data = dynamic_cast<DataPack*>(dat->pack);
-	if (data && data->reliable)
+	if (data && (data->flags & RELIABLE))
 	{
 		//printf("RUDP------>Received a reliable datapack with seq ID = %d from port %d\n", dynamic_cast<DataPack*>(dat->pack)->seq_num,ntohs(dat->sock->sin_port));
 		pRemote(*dat->sock);

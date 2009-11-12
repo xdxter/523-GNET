@@ -8,10 +8,10 @@
 
 enum SendOptions
 {
-	None = 0,
-	Reliable = 1,
-	Sequenced = 2,
-	Aggregated = 4
+	NONE = 0,
+	RELIABLE = 1,
+	SEQUENCED = 2,
+	AGGREGATED = 4
 };
 
 namespace GNET {
@@ -28,7 +28,7 @@ namespace GNET {
 
 		DataPack* Receive(bool should_block, SOCKADDR_IN *sock = 0);
 		void Peer::Send(INetPacket *pack, IFilter *filter, bool reliable = false);
-		void Send(INetPacket *pack, SOCKADDR_IN *remote, char flag = None);
+		void Send(INetPacket *pack, SOCKADDR_IN *remote, char flag = NONE);
 
 		//test funcs by aapte
 		void NSimulatorSend(INetPacket *pack, SOCKADDR_IN *remote, bool reliable = false);
