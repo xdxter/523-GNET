@@ -40,8 +40,9 @@ bool Connection::HandlePacket(Datagram *data) {
 	bool handled = false;
 	if (!handled) handled = connectprotocol.HandlePacket(data);
 	if (!handled) handled = heartbeat.HandlePacket(data);
+
 	if (!handled) handled = rudpTracker.HandlePacket(data);
-	
+	if (!handled) handled = sequenceMonitor.HandlePacket(data);
 	// this will return true if the packet has been handled
 	return handled; 
 }
@@ -57,4 +58,23 @@ void Connection::TryConnecting(int max_attempts, int ms_delay, Turnkey<bool>* ke
 
 int Connection::Seq_Num() {
 	return seq_num_out++;
+}
+
+bool SequenceMonitor::HandlePacket(Datagram *dat){
+	DataPack* data = dynamic_cast<DataPack*>(dat->pack);
+	if (data && (data->flags & SEQUENCED))
+	{
+		if ( int(data->seq_num) > int(this->seq_num)) {		////// so weird!!!!!!!!!!!
+			this->seq_num = data->seq_num;
+			dd("Sequenced UDP =======> ACCEPTED..");
+			return false;
+		}
+		else
+		{
+			dd("Sequenced UDP =======> NOT ACCEPTED..");
+			return true;
+		}
+	}
+	else
+		return false;
 }

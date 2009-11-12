@@ -168,11 +168,14 @@ void Peer::Send(INetPacket *pack, SOCKADDR_IN *remote, char FLAGS)
 	{
 		if (dynamic_cast<DataPack*>(pack))
 		{
-			dynamic_cast<DataPack*>(pack)->flags = FLAGS;
-			if(FLAGS & RELIABLE)
+			dynamic_cast<DataPack*>(pack)->flags = FLAGS;//setting datapack flag
+			if(FLAGS & SEQUENCED || FLAGS & RELIABLE)
 			{
 				dynamic_cast<DataPack*>(pack)->seq_num = it->second->Seq_Num();
-				it->second->TrackRudpPacket(dynamic_cast<DataPack*>(pack), remote);
+				if(FLAGS & RELIABLE)
+				{
+					it->second->TrackRudpPacket(dynamic_cast<DataPack*>(pack), remote);
+				}
 			}
 		}
 	}
@@ -316,7 +319,6 @@ int Peer::logcThread(void) {
 						connections.insert( ConnectionTablePair( SA2ULUS(*data.sock), new Connection(*data.sock, this)));
 					if (it_pair.second) 
 						it_pair.first->second->HandlePacket(&data);
-				
 			}
 
 			recv_buffer.Lock();

@@ -39,21 +39,24 @@ int _tmain(int argc, _TCHAR* argv[])
 	
 		// Send a data packet
 		MsgPacket msg;
-		strcpy(msg.msg, "This is a message.\n");
+		strcpy(msg.msg, "This is a message.");
 
 		SOCKADDR_IN target;
 		target.sin_addr.S_un.S_addr = inet_addr(SERVER_ADDY);
 		target.sin_family = AF_INET;
 		target.sin_port = htons(SERVER_PORT);
 
-		//Comment this while using the simulation of Dropping packets
-		gnet->Send(CreateDataPack(&msg),&target, RELIABLE | SEQUENCED);
-		
-		//Uncomment this for using the Simulation of Dropping Packets
+		//test Simulation of Dropping Packets
 		/*while(true)
 		{
 			gnet->NSimulatorSend(CreateDataPack(&msg),&target);
 		}*/
+
+
+
+		//test reliable udp
+		for(int i = 0; i<10; i++)
+			gnet->Send(CreateDataPack(&msg),&target, RELIABLE | SEQUENCED);
 
 		while (true) {
 		// Receive a packet. Passing true in means that the call will block until one is received.

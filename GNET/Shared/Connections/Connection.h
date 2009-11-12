@@ -13,6 +13,15 @@
 namespace GNET {
 	class Peer;
 
+	class SequenceMonitor{
+	public:
+		SequenceMonitor(){
+			seq_num = -1;
+		}
+		bool HandlePacket(Datagram * dat);
+		int seq_num;
+	};
+
 	class Connection {	
 	public:
 		SOCKADDR_IN remote;
@@ -40,9 +49,9 @@ namespace GNET {
 		Heartbeat heartbeat;
 		ConnectProtocol connectprotocol;
 		ReliableTracker rudpTracker;
+		SequenceMonitor sequenceMonitor;
 
 		int seq_num_out;
 		bool should_disconnect;
 	};
-	
 }

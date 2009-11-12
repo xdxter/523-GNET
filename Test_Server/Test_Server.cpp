@@ -35,10 +35,10 @@ int _tmain(int argc, _TCHAR* argv[])
 			pRemote(remote);
 			printf("%s\n", static_cast<MsgPacket*>(dp->game)->msg);
 
-			// Reply to user
-			MsgPacket m;
-			strcpy(m.msg,"CANDLEJACK SAYS H-");
-			gnet->Send(CreateDataPack(&m), &remote, RELIABLE);
+			//Reply to user
+			//MsgPacket m;
+			//strcpy(m.msg,"CANDLEJACK SAYS H-");
+			//gnet->Send(CreateDataPack(&m), &remote, RELIABLE);
 
 			// Broadcast message to others
 			GNET::FilterEveryoneBut filter(&remote);
