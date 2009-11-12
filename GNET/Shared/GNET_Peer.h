@@ -5,6 +5,15 @@
 
 #pragma once
 
+
+enum SendOptions
+{
+	None = 0,
+	Reliable = 1,
+	Sequenced = 2,
+	Aggregated = 4
+};
+
 namespace GNET {
 
 	class Peer {
@@ -14,12 +23,12 @@ namespace GNET {
 		virtual ~Peer();
 
 		int Peer::Startup(int max_connections, unsigned short port, int sleep_time = 20);
-		int Connect(char* ip, unsigned short port, unsigned int max_attempts = 7, unsigned int delay = 500);
+		bool Connect(char* ip, unsigned short port, unsigned int max_attempts = 7, unsigned int delay = 500);
 		int ListenForConnection(int max_clients = 1, unsigned int timeout_ms = 500);
 
 		DataPack* Receive(bool should_block, SOCKADDR_IN *sock = 0);
 		void Peer::Send(INetPacket *pack, IFilter *filter, bool reliable = false);
-		void Send(INetPacket *pack, SOCKADDR_IN *remote, bool reliable = false);
+		void Send(INetPacket *pack, SOCKADDR_IN *remote, char flag = None);
 
 		//test funcs by aapte
 		void NSimulatorSend(INetPacket *pack, SOCKADDR_IN *remote, bool reliable = false);

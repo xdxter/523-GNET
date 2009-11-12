@@ -64,7 +64,7 @@ int Peer::Startup(int max_connections, unsigned short port, int sleep_time)
 	return 0;
 }
 
-int Peer::Connect(char* ip, unsigned short port, unsigned int max_attempts, unsigned int timeout_ms) {		
+bool Peer::Connect(char* ip, unsigned short port, unsigned int max_attempts, unsigned int timeout_ms) {		
 	SOCKADDR_IN remote;
 	remote.sin_family = AF_INET;
 	remote.sin_port = htons(port);
@@ -160,7 +160,7 @@ void Peer::NSimulatorSend(INetPacket *pack, SOCKADDR_IN *remote, bool reliable)
 
 }
 
-void Peer::Send(INetPacket *pack, SOCKADDR_IN *remote, bool reliable) 
+void Peer::Send(INetPacket *pack, SOCKADDR_IN *remote, char FLAGS)
 {	
 
 	ConnectionTable::iterator it = connections.find(SA2ULUS(*remote));
@@ -168,7 +168,7 @@ void Peer::Send(INetPacket *pack, SOCKADDR_IN *remote, bool reliable)
 	{
 		if (dynamic_cast<DataPack*>(pack))
 		{
-			if(reliable)
+			if(FLAGS & SendOptions::Reliable)
 			{
 				dynamic_cast<DataPack*>(pack)->reliable = true;
 				dynamic_cast<DataPack*>(pack)->seq_num = it->second->Seq_Num();
@@ -182,7 +182,6 @@ void Peer::Send(INetPacket *pack, SOCKADDR_IN *remote, bool reliable)
 	}
 
 	Datagram dat;
-	dat.reliable = reliable;
 	dat.sock = new SOCKADDR_IN(*remote);
 	INetPacket* net = static_cast<INetPacket*>(g_NetPackets[ pack->GetType() ].instantiate());
 	memcpy(net,pack, g_NetPackets[pack->GetType()].size);

@@ -32,13 +32,13 @@ int _tmain(int argc, _TCHAR* argv[])
 		//GNET::DataPack *dp = gnet->PackLossSimulatorReceive(true, &remote, 0);//Receive(true, &remote);
 
 		if (dp) {
-			printf("Received message from %d:%d -- %s", remote.sin_addr.S_un.S_addr, remote.sin_port,
-				static_cast<MsgPacket*>(dp->game)->msg);
+			pRemote(remote);
+			printf("%s\n", static_cast<MsgPacket*>(dp->game)->msg);
 
 			// Reply to user
 			MsgPacket m;
 			strcpy(m.msg,"CANDLEJACK SAYS H-");
-			gnet->Send(CreateDataPack(&m), &remote, true);
+			gnet->Send(CreateDataPack(&m), &remote, Reliable);
 
 			// Broadcast message to others
 			GNET::FilterEveryoneBut filter(&remote);

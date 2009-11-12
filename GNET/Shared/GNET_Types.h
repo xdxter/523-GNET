@@ -10,8 +10,10 @@
 #ifdef DEBUG
 #include <iostream>
 #define dd(x) std::cout << x << "\n";
+#define pRemote(x) printf("Received from %s:%d ==> ", inet_ntoa((x).sin_addr), ntohs((x).sin_port))
 #else
 #define dd(x) 
+#define pSource(x) 
 #endif
 
 
@@ -43,7 +45,6 @@ namespace GNET {
 		}
 	};
 	struct Datagram {
-		bool reliable;
 		SOCKADDR_IN *sock;
 		INetPacket *pack;
 	};
