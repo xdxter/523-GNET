@@ -1,4 +1,3 @@
-#include <iostream>
 #include <map>
 #include "winsock2.h"
 #include "GNET_Peer.h"
@@ -140,6 +139,49 @@ void Peer::Send(INetPacket *pack, IFilter *filter, bool reliable)
 		}
 	}
 }
+
+SOCKADDR_IN* Peer::ClientEntered(bool should_block) {
+	connection_events.Lock();
+	if (should_block) {
+		connection_events.Wait();
+	} else {		
+		// Decrement the semaphore without blocking.
+		if (!connection_events->empty())		
+			connection_events.Wait();
+		// Or exit if the buffer is empty.
+		else {		
+			connection_events.Unlock();
+			return 0;
+		}
+	}
+	SOCKADDR_IN *sock = &(connection_events->front());
+	connection_events->pop();
+	connection_events.Unlock();
+
+	return sock;
+}
+
+SOCKADDR_IN* Peer::ClientExited(bool should_block) {
+	disconnect_events.Lock();
+	if (should_block) {
+		disconnect_events.Wait();
+	} else {		
+		// Decrement the semaphore without blocking.
+		if (!disconnect_events->empty())		
+			disconnect_events.Wait();
+		// Or exit if the buffer is empty.
+		else {		
+			disconnect_events.Unlock();
+			return 0;
+		}
+	}
+	SOCKADDR_IN *sock = &(disconnect_events->front());
+	disconnect_events->pop();
+	disconnect_events.Unlock();
+
+	return sock;
+}
+
 
 //Added a function to drop the packets which the user gives to send
 static int delay1;

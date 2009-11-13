@@ -1,3 +1,4 @@
+#include <queue>
 #include "GNET_Peer.h"
 #include "Connections/Connection.h"
 #include "Connections/Parts/ConnectProtocol.h"
@@ -47,8 +48,21 @@ bool Connection::HandlePacket(Datagram *data) {
 	return handled; 
 }
 
+void Connection::Connect() {
+	peer->connection_events.Lock(); // Do we actually need to lock the mutex?
+	peer->connection_events->push(remote); 
+	peer->connection_events.Pulse();
+	peer->connection_events.Unlock();
+}
+
 void Connection::Disconnect() {
 	should_disconnect = true;
+
+	peer->disconnect_events.Lock();
+	peer->disconnect_events->push(remote); 
+	peer->disconnect_events.Pulse();
+	peer->disconnect_events.Unlock();
+	
 	dd("Disconnecting connection with " << remote.sin_addr.S_un.S_addr << ":" << remote.sin_port);
 }
 

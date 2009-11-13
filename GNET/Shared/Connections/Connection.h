@@ -41,6 +41,7 @@ namespace GNET {
 		friend ConnectProtocol;
 		friend ReliableTracker;
 
+		void Connect();
 		void Disconnect();
 
 	private:

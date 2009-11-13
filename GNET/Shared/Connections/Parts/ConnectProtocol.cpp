@@ -68,9 +68,14 @@ namespace GNET {
 					dd("Received Ack Packet");
 					if (state == WAITING_FOR_ACK)
 						state = CONNECTED;
+					connection->Connect();
 					return true;
 				}
 			default:
+				// Do not accept packets before being connected,
+				// if not relevant to the connection protocol
+				if (state != CONNECTED)
+					return true;
 				return false;
 		}
 	}

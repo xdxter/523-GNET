@@ -54,8 +54,7 @@ namespace GNET {
 	typedef std::pair<ulus, Connection*> ConnectionTablePair;
 	typedef std::map<ulus, Connection* > ConnectionTable;
 	typedef std::queue<Datagram> DgramBuffer;
-	
-	typedef std::vector<SOCKADDR_IN> SockBuffer;
+	typedef std::queue<SOCKADDR_IN> SockBuffer;
 
 
 	//reliable udp map
