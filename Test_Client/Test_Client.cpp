@@ -19,7 +19,7 @@ struct MsgPacket : GNET::IGamePacket {
 
 #define LISTEN_PORT 3333
 #define SERVER_PORT 4444
-#define SERVER_ADDY "127.0.0.1"
+#define SERVER_ADDR "127.0.0.1"
 
 int _tmain(int argc, _TCHAR* argv[])
 {
@@ -31,7 +31,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	gnet->Startup(1, (rand() % 1000) + 4000, 7);
 
 	// Connect to server
-	bool connected = gnet->Connect(SERVER_ADDY, SERVER_PORT, 3);
+	bool connected = gnet->Connect(SERVER_ADDR, SERVER_PORT, 3);
 	if (!connected) {
 		printf("Failed to connect to server.\n");
 	} else {
@@ -42,7 +42,8 @@ int _tmain(int argc, _TCHAR* argv[])
 		strcpy(msg.msg, "This is a message.");
 
 		SOCKADDR_IN target;
-		target.sin_addr.S_un.S_addr = inet_addr(SERVER_ADDY);
+		//target.sin_addr.S_un.S_addr = inet_addr(SERVER_ADDR);
+		target.sin_addr.S_un.S_addr = htonl(INADDR_BROADCAST);	//send by broadcast
 		target.sin_family = AF_INET;
 		target.sin_port = htons(SERVER_PORT);
 
@@ -51,8 +52,6 @@ int _tmain(int argc, _TCHAR* argv[])
 		{
 			gnet->NSimulatorSend(CreateDataPack(&msg),&target);
 		}*/
-
-
 
 		//test reliable udp
 		for(int i = 0; i<10; i++)

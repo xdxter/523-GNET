@@ -54,6 +54,12 @@ int Peer::Startup(int max_connections, unsigned short port, int sleep_time)
 	hostAddr.sin_port = htons(port);
 	hostAddr.sin_addr.S_un.S_addr = htonl(INADDR_ANY);
 
+	//allow broadcasting
+    bool bOptVal = true;
+    int bOptLen = sizeof(bool);
+    int iOptLen = sizeof(int);
+	setsockopt(this->socketID, SOL_SOCKET, SO_BROADCAST, (char*)&bOptVal, bOptLen); 
+
 	bind(this->socketID, (SOCKADDR*)&hostAddr, sizeof(SOCKADDR));
 
 	CreateThread(NULL, 0, runRecvThread, this, 0, NULL);
@@ -343,6 +349,9 @@ int Peer::logcThread(void) {
 			recv_buffer->pop();
 
 			recv_buffer.Unlock();
+
+			//pRemote(*data.sock);
+			printf("received something...... from        ");pRemote(*data.sock);printf("\n");
 
 
 			it = connections.find(SA2ULUS(*data.sock));
