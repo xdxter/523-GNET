@@ -25,7 +25,8 @@ namespace GNET {
 
 		int Startup(int max_connections, unsigned short port, int sleep_time = 20);
 		bool Connect(char* ip, unsigned short port, unsigned int max_attempts = 7, unsigned int delay = 500);
-		int ListenForConnection(int max_clients = 1, unsigned int timeout_ms = 500);
+		int ListenForConnection(int max_clients = 1, unsigned int timeout_ms = 500, bool discovery_mode = false);
+		void DiscoverServer(int port);
 
 		DataPack* Receive(bool should_block, SOCKADDR_IN *sock = 0);
 		void Send(INetPacket *pack, IFilter *filter, bool reliable = false);
@@ -56,6 +57,7 @@ namespace GNET {
 		int max_connections;
 		int max_clients;
 		int sleep_time;
+		bool discovery_mode;
 		unsigned int max_packet_size;
 
 		Monitor<DgramBuffer> send_buffer;

@@ -42,8 +42,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		strcpy(msg.msg, "This is a message.");
 
 		SOCKADDR_IN target;
-		//target.sin_addr.S_un.S_addr = inet_addr(SERVER_ADDR);
-		target.sin_addr.S_un.S_addr = htonl(INADDR_BROADCAST);	//send by broadcast
+		target.sin_addr.S_un.S_addr = inet_addr(SERVER_ADDR);
 		target.sin_family = AF_INET;
 		target.sin_port = htons(SERVER_PORT);
 

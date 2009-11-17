@@ -54,12 +54,6 @@ int Peer::Startup(int max_connections, unsigned short port, int sleep_time)
 	hostAddr.sin_port = htons(port);
 	hostAddr.sin_addr.S_un.S_addr = htonl(INADDR_ANY);
 
-	//allow broadcasting
-    bool bOptVal = true;
-    int bOptLen = sizeof(bool);
-    int iOptLen = sizeof(int);
-	setsockopt(this->socketID, SOL_SOCKET, SO_BROADCAST, (char*)&bOptVal, bOptLen); 
-
 	bind(this->socketID, (SOCKADDR*)&hostAddr, sizeof(SOCKADDR));
 
 	CreateThread(NULL, 0, runRecvThread, this, 0, NULL);
@@ -89,9 +83,19 @@ bool Peer::Connect(char* ip, unsigned short port, unsigned int max_attempts, uns
 	return connecting.GetResult();
 }
 
-int Peer::ListenForConnection(int max_clients, unsigned int timeout_ms) {
+int Peer::ListenForConnection(int max_clients, unsigned int timeout_ms, bool discovery_mode) {
 	this->max_clients = max_clients;
 	this->connect_timeout = timeout_ms;
+	this->discovery_mode = discovery_mode;
+
+	//allow broadcasting
+	if(discovery_mode)
+	{
+	    bool bOptVal = true;
+	    int bOptLen = sizeof(bool);
+	    int iOptLen = sizeof(int);
+		setsockopt(this->socketID, SOL_SOCKET, SO_BROADCAST, (char*)&bOptVal, bOptLen); 
+	}
 	return 1;
 }
 
@@ -144,6 +148,23 @@ void Peer::Send(INetPacket *pack, IFilter *filter, bool reliable)
 			Send(pack, &addr, reliable);
 		}
 	}
+}
+
+void Peer::DiscoverServer(int port)
+{
+	SOCKADDR_IN target;
+	target.sin_addr.S_un.S_addr = htonl(INADDR_BROADCAST);	//send by broadcast
+	target.sin_family = AF_INET;
+	target.sin_port = htons(port);
+
+	DhcpPack pack;
+	pack.instigator = true;
+
+	Datagram dgram;
+	dgram.pack = DhcpPack;
+	dgram.sock = target;
+	//send broadcast message
+	Send(&dgram);
 }
 
 SOCKADDR_IN* Peer::ClientEntered(bool should_block) {

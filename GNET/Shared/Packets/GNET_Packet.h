@@ -33,7 +33,8 @@ namespace GNET {
 		DATA_PACKET,
 		MARCO_PACKET,
 		POLO_PACKET,
-		RUDP_ACK_PACKET
+		RUDP_ACK_PACKET,
+		DHCP_PACKET
 	};
 
 	struct INetPacket {
@@ -78,6 +79,11 @@ namespace GNET {
 		int seq_num;
 		PACKET_TYPE(RUDP_ACK_PACKET, RudpAckPack);
 	};
+	struct DhcpPack : INetPacket
+	{
+		bool instigator;
+		PACKET_TYPE(DHCP_PACKET, DhcpPack);
+	};
 #pragma pack(pop)
 
 	class PacketEncoder {
@@ -92,6 +98,7 @@ namespace GNET {
 			REGISTER_PACKET(MarcoPack,g_NetPackets);
 			REGISTER_PACKET(PoloPack,g_NetPackets);
 			REGISTER_PACKET(RudpAckPack,g_NetPackets);
+			REGISTER_PACKET(DhcpPack,g_NetPackets);
 		}
 	};
 
