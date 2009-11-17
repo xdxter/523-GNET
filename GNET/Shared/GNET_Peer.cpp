@@ -378,9 +378,9 @@ int Peer::logcThread(void) {
 
 		for (it = connections.begin(); it != connections.end();) {
 			if (!it->second->Update()) 
-				connections.erase(it++);
-			else
-				it++;
+				connections.erase(it++);	// Post increment is required here to prevent errors, don't change.
+			else							// ...
+				it++;						// just don't do it.
 		}
 		pacing.WaitTillFinished();
 	}

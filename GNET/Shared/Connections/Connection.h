@@ -16,10 +16,10 @@ namespace GNET {
 	class SequenceMonitor{
 	public:
 		SequenceMonitor(){
-			seq_num = -1;
+			seq_num = 0;
 		}
 		bool HandlePacket(Datagram * dat);
-		int seq_num;
+		unsigned int seq_num;
 	};
 
 	class Connection {	

@@ -49,7 +49,7 @@ bool Connection::HandlePacket(Datagram *data) {
 }
 
 void Connection::Connect() {
-	peer->connection_events.Lock(); // Do we actually need to lock the mutex?
+	peer->connection_events.Lock(); 
 	peer->connection_events->push(remote); 
 	peer->connection_events.Pulse();
 	peer->connection_events.Unlock();
@@ -78,8 +78,8 @@ bool SequenceMonitor::HandlePacket(Datagram *dat){
 	DataPack* data = dynamic_cast<DataPack*>(dat->pack);
 	if (data && (data->flags & SEQUENCED))
 	{
-		if ( int(data->seq_num) > int(this->seq_num)) {		////// so weird!!!!!!!!!!!
-			this->seq_num = data->seq_num;
+		if ( data->seq_num >= this->seq_num) {		////// so weird!!!!!!!!!!!
+			this->seq_num = data->seq_num+1;
 			dd("Sequenced UDP =======> ACCEPTED..");
 			return false;
 		}

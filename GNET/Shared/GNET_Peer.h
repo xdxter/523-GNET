@@ -11,7 +11,8 @@ enum SendOptions
 	NONE = 0,
 	RELIABLE = 1,
 	SEQUENCED = 2,
-	AGGREGATED = 4
+	AGGREGATED = 4,
+	COMPRESSED = 8
 };
 
 namespace GNET {
