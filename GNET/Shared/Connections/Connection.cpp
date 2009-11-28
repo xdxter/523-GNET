@@ -31,6 +31,19 @@ bool Connection::Update() {
 	return !should_disconnect;
 }
 
+bool Connection::SendingPacket(Datagram * dgram) { 
+	bool send_handled = false;
+
+	send_handled &= rudpTracker.SendingPacket(dgram);
+	// ...
+	// This is where we can append other stuff prior to sending.
+	// if we follow the same format of 
+	//    send_handled &= thing.SendingPacket(dgram);
+	// ...
+
+	return send_handled;
+}
+
 bool Connection::HandlePacket(Datagram *data) {
 	if (should_disconnect)
 		return false;
@@ -44,12 +57,13 @@ bool Connection::HandlePacket(Datagram *data) {
 
 	if (!handled) handled = rudpTracker.HandlePacket(data);
 	if (!handled) handled = sequenceMonitor.HandlePacket(data);
+
 	// this will return true if the packet has been handled
 	return handled; 
 }
 
 void Connection::Connect() {
-	peer->connection_events.Lock(); // Do we actually need to lock the mutex?
+	peer->connection_events.Lock(); 
 	peer->connection_events->push(remote); 
 	peer->connection_events.Pulse();
 	peer->connection_events.Unlock();
@@ -63,7 +77,7 @@ void Connection::Disconnect() {
 	peer->disconnect_events.Pulse();
 	peer->disconnect_events.Unlock();
 	
-	dd("Disconnecting connection with " << remote.sin_addr.S_un.S_addr << ":" << remote.sin_port);
+	DBG_PRINT("Disconnecting connection with " << SOCK_PRNT(remote));
 }
 
 void Connection::TryConnecting(int max_attempts, int ms_delay, Turnkey<bool>* key) {
@@ -72,23 +86,4 @@ void Connection::TryConnecting(int max_attempts, int ms_delay, Turnkey<bool>* ke
 
 int Connection::Seq_Num() {
 	return seq_num_out++;
-}
-
-bool SequenceMonitor::HandlePacket(Datagram *dat){
-	DataPack* data = dynamic_cast<DataPack*>(dat->pack);
-	if (data && (data->flags & SEQUENCED))
-	{
-		if ( int(data->seq_num) > int(this->seq_num)) {		////// so weird!!!!!!!!!!!
-			this->seq_num = data->seq_num;
-			dd("Sequenced UDP =======> ACCEPTED..");
-			return false;
-		}
-		else
-		{
-			dd("Sequenced UDP =======> NOT ACCEPTED..");
-			return true;
-		}
-	}
-	else
-		return false;
 }

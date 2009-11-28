@@ -7,7 +7,6 @@
 #include "Packets/GNET_Packet.h"
 #include "GNET_Peer.h"
 
-
 #pragma pack(push,1)
 struct MsgPacket : GNET::IGamePacket {
 	char msg[20];
@@ -32,8 +31,8 @@ int _tmain(int argc, _TCHAR* argv[])
 		//GNET::DataPack *dp = gnet->PackLossSimulatorReceive(true, &remote, 0);//Receive(true, &remote);
 
 		if (dp) {
-			pRemote(remote);
-			printf("%s\n", static_cast<MsgPacket*>(dp->game)->msg);
+			std::cout << "Received a message from " << SOCK_PRNT(remote) << ": " 
+				<< static_cast<MsgPacket*>(dp->game)->msg << "\n";
 
 			//Reply to user
 			//MsgPacket m;

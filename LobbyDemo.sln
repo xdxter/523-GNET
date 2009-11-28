@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GNET_Peer", "GNET\GNET_Peer.vcproj", "{33BF4F4D-8342-4FBB-A6B9-564250109022}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UDP", "UDP\UDP.vcproj", "{B24EE717-892E-4A85-A7E9-A103E08FABDB}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GameServer", "GameServer\GameServer.vcproj", "{D444C700-DA3F-4E0E-889E-C3147E069385}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{33BF4F4D-8342-4FBB-A6B9-564250109022}.Debug|Win32.ActiveCfg = Debug|Win32
+		{33BF4F4D-8342-4FBB-A6B9-564250109022}.Debug|Win32.Build.0 = Debug|Win32
+		{33BF4F4D-8342-4FBB-A6B9-564250109022}.Release|Win32.ActiveCfg = Release|Win32
+		{33BF4F4D-8342-4FBB-A6B9-564250109022}.Release|Win32.Build.0 = Release|Win32
+		{B24EE717-892E-4A85-A7E9-A103E08FABDB}.Debug|Win32.ActiveCfg = Debug|Win32
+		{B24EE717-892E-4A85-A7E9-A103E08FABDB}.Debug|Win32.Build.0 = Debug|Win32
+		{B24EE717-892E-4A85-A7E9-A103E08FABDB}.Release|Win32.ActiveCfg = Release|Win32
+		{B24EE717-892E-4A85-A7E9-A103E08FABDB}.Release|Win32.Build.0 = Release|Win32
+		{D444C700-DA3F-4E0E-889E-C3147E069385}.Debug|Win32.ActiveCfg = Debug|Win32
+		{D444C700-DA3F-4E0E-889E-C3147E069385}.Debug|Win32.Build.0 = Debug|Win32
+		{D444C700-DA3F-4E0E-889E-C3147E069385}.Release|Win32.ActiveCfg = Release|Win32
+		{D444C700-DA3F-4E0E-889E-C3147E069385}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

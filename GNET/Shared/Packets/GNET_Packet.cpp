@@ -58,7 +58,26 @@ INetPacket* PacketEncoder::DecodePacket(char* buffer, int i) {
 	return 0;
 }
 
-
+INetPacket* PacketEncoder::CreateCopy(const INetPacket& pack) {
+	INetPacket* ret = 0;	
+	PktRegMap::iterator it = g_NetPackets.find( pack.GetType() );	
+	if (it != g_NetPackets.end()) {
+		PktReg* pkt = &(it->second);
+		ret = static_cast<INetPacket*>( pkt->instantiate() );
+		memcpy(ret, &pack, pkt->size);
+	}
+	return ret;
+}
+IGamePacket* PacketEncoder::CreateCopy(const IGamePacket& pack) {
+	IGamePacket* ret = 0;	
+	PktRegMap::iterator it = g_GamePackets.find( pack.GetType() );	
+	if (it != g_GamePackets.end()) {
+		PktReg* pkt = &(it->second);
+		ret = static_cast<IGamePacket*>( pkt->instantiate() );
+		memcpy(ret, &pack, pkt->size);
+	}
+	return ret;
+}
 // --memcpy function wrappers--
 int copyin(char* buff, int offset, char* pack, int size, int psize) {
 	size -= psize;

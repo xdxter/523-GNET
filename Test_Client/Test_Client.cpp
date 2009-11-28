@@ -54,9 +54,12 @@ int _tmain(int argc, _TCHAR* argv[])
 
 
 
+		gnet->Send( CreateDataPack(&msg), &target);
+
+
 		//test reliable udp
-		for(int i = 0; i<10; i++)
-			gnet->Send(CreateDataPack(&msg),&target, RELIABLE | SEQUENCED);
+		for(int i = 0; i<1; i++)
+			gnet->Send( &msg ,&target, RELIABLE | SEQUENCED);
 
 		while (true) {
 		// Receive a packet. Passing true in means that the call will block until one is received.

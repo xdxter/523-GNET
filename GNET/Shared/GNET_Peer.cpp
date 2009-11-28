@@ -1,15 +1,11 @@
 #include <map>
 #include "winsock2.h"
 #include "GNET_Peer.h"
-#include "GNET_Compression.h"
+#include "Packets/Compression.h"
 
 #define MAX_PACKETSIZE 16
 
 using namespace GNET;
-
-DWORD WINAPI runRecvThread(void* param) { return ((Peer*)param)->recvThread(); }
-DWORD WINAPI runSendThread(void* param) { return ((Peer*)param)->sendThread(); }
-DWORD WINAPI runLogcThread(void* param) { return ((Peer*)param)->logcThread(); }
 
 Peer::Peer(unsigned int max_packet_size) :
 send_buffer(1000),
@@ -43,7 +39,7 @@ int Peer::Startup(int max_connections, unsigned short port, int sleep_time)
 		return error;
 	}
 
-	this->socketID = socket(AF_INET, SOCK_DGRAM, 0);
+	this->socketID = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 	if (this->socketID == INVALID_SOCKET) {
 		WSACleanup();
 		return SOCK_CREATE_FAILED;
@@ -56,9 +52,9 @@ int Peer::Startup(int max_connections, unsigned short port, int sleep_time)
 
 	bind(this->socketID, (SOCKADDR*)&hostAddr, sizeof(SOCKADDR));
 
-	CreateThread(NULL, 0, runRecvThread, this, 0, NULL);
-	CreateThread(NULL, 0, runSendThread, this, 0, NULL);
-	CreateThread(NULL, 0, runLogcThread, this, 0, NULL);
+	CreateThread(NULL, 0, Peer::runRecvThread, this, 0, NULL);
+	CreateThread(NULL, 0, Peer::runSendThread, this, 0, NULL);
+	CreateThread(NULL, 0, Peer::runLogcThread, this, 0, NULL);
 
 	return 0;
 }
@@ -86,20 +82,11 @@ bool Peer::Connect(char* ip, unsigned short port, unsigned int max_attempts, uns
 int Peer::ListenForConnection(int max_clients, unsigned int timeout_ms) {
 	this->max_clients = max_clients;
 	this->connect_timeout = timeout_ms;
+
+	DBG_PRINT("GNET: Waiting for connection.");
 	return 1;
 }
 
-//Receive Taking packets only according to delay
-DataPack* Peer::PackLossSimulatorReceive(bool block, SOCKADDR_IN *sock, int delay)
-{
-	
-	Timer check_time(delay);
-	check_time.WaitTillFinished();
-	
-			DataPack *dp = Receive(block, sock);
-			return dp;
-	
-}
 DataPack* Peer::Receive(bool block, SOCKADDR_IN *sock) {
 	game_recv_buffer.Lock();
 	if (block) {
@@ -127,7 +114,21 @@ DataPack* Peer::Receive(bool block, SOCKADDR_IN *sock) {
 	return static_cast<DataPack*>(dgram->pack);
 }
 
-void Peer::Send(INetPacket *pack, IFilter *filter, bool reliable) 
+void Peer::Send(IGamePacket *pack, IFilter *filter, char flags) 
+{
+	DataPack *dat = new DataPack;
+	dat->game = PacketEncoder::CreateCopy(*pack);
+	Send(dat, filter, flags);
+}
+
+void Peer::Send(IGamePacket *pack, SOCKADDR_IN *remote, char flags) 
+{
+	DataPack *dat = new DataPack;
+	dat->game = PacketEncoder::CreateCopy(*pack);
+	Send(dat, remote, flags);
+}
+
+void Peer::Send(INetPacket *pack, IFilter *filter, char flags) 
 {
 	SOCKADDR_IN addr;
 	for (ConnectionTable::iterator it = connections.begin(); 
@@ -135,10 +136,41 @@ void Peer::Send(INetPacket *pack, IFilter *filter, bool reliable)
 	{
 		if (filter->ShouldSend(it->first)) {
 			ULUS2SA(it->first, addr);
-			Send(pack, &addr, reliable);
+			Send(pack, &addr, flags);
 		}
 	}
 }
+
+void Peer::Send(INetPacket *pack, SOCKADDR_IN *remote, char flags)
+{	
+	// Assemble a Datagram to hold this info
+	Datagram* dgram = new Datagram;
+	dgram->flags = flags;
+	dgram->sock = new SOCKADDR_IN(*remote);
+	dgram->pack = PacketEncoder::CreateCopy(*pack);	
+
+	// Would our connection like to handle sending instead?
+	ConnectionTable::iterator it = connections.find(SA2ULUS(*remote));
+	if(it != connections.end())
+	{
+		bool send_handled = it->second->SendingPacket(dgram);
+		if (send_handled) {
+			delete dgram;			
+			return;
+		}
+	}
+
+	// Time to send!
+	Send(dgram);
+}
+void Peer::Send(Datagram *dgram) 
+{
+	send_buffer.Lock();
+	send_buffer->push( *dgram );
+	send_buffer.Pulse();
+	send_buffer.Unlock();
+}
+
 
 SOCKADDR_IN* Peer::ClientEntered(bool should_block) {
 	connection_events.Lock();
@@ -182,148 +214,102 @@ SOCKADDR_IN* Peer::ClientExited(bool should_block) {
 	return sock;
 }
 
-
-//Added a function to drop the packets which the user gives to send
-static int delay1;
-static int delay2;
-
-void Peer::NSimulatorSend(INetPacket *pack, SOCKADDR_IN *remote, bool reliable)
-{
-
-	delay1 = rand()%60000+1;
-	delay2 = rand()%10+1;
-	
-	if(delay1==999 && delay2==4)
-	{
-		Send(pack,remote);
-	}
-	//Randomly Dropping Packets
-
-
-}
-
-void Peer::Send(INetPacket *pack, SOCKADDR_IN *remote, char FLAGS)
-{	
-
-	ConnectionTable::iterator it = connections.find(SA2ULUS(*remote));
-	if(it != connections.end())
-	{
-		if (dynamic_cast<DataPack*>(pack))
-		{
-			dynamic_cast<DataPack*>(pack)->flags = FLAGS;//setting datapack flag
-			if(FLAGS & SEQUENCED || FLAGS & RELIABLE)
-			{
-				dynamic_cast<DataPack*>(pack)->seq_num = it->second->Seq_Num();
-				if(FLAGS & RELIABLE)
-				{
-					it->second->TrackRudpPacket(dynamic_cast<DataPack*>(pack), remote);
-				}
-			}
-		}
-	}
-
-	Datagram dat;
-	dat.sock = new SOCKADDR_IN(*remote);
-	INetPacket* net = static_cast<INetPacket*>(g_NetPackets[ pack->GetType() ].instantiate());
-	memcpy(net,pack, g_NetPackets[pack->GetType()].size);
-	dat.pack = net;
-	Send(&dat);
-}
-void Peer::Send(Datagram *dat) 
-{
-	send_buffer.Lock();
-	send_buffer->push( *dat );
-	send_buffer.Pulse();
-	send_buffer.Unlock();
-}
-
 int Peer::recvThread(void) {
-	char buff[1024];
+	// Packet Decoding Vars
+	INetPacket* packet;
+	char* buff = new char[max_packet_size];
 	SOCKADDR remote;
-	compression dd;
 	int len = sizeof(SOCKADDR);
+	
+	// Compression Vars
+	Compression compress;
+	char* compressed_buff = new char[max_packet_size - 1]; 
+	
+	// Thread Loop
 	while (true) {
-		int recv = recvfrom(this->socketID, buff, 1024, 0, &remote, &len);
-		////add compression
-		//char *output=new char[1024];
-		//int outputsize=1024;
-		//char* ptr=buff;
-		//if(*ptr==1)	//compressed
-		//{
-		//	int aa=dd.decomp(ptr+1,output,outputsize);
-		//	if (aa==-1)	//output is not large enough
-		//	{
-		//		delete output;
-		//		output= new char[outputsize];
-		//		aa=dd.decomp(ptr+1,output,outputsize);
-		//	}
-		//}
-		//else		//uncompressed
-		//{
-		//	memcpy(output,buff+1,1023);
-		//}
-		////finish
-		INetPacket* packet = PacketEncoder::DecodePacket(buff);
+	//	remote = 0;
+		len = sizeof(SOCKADDR);
+		int recv = recvfrom(this->socketID, buff, max_packet_size, 0, &remote, &len);	
+		if (recv==0) {
+			DBG_PRINT("Socket has gracefully closed.");
+			break;  // socket has been gracefully closed.
+		}
+		if (recv==-1) {
+			int error = WSAGetLastError();			
+			if (error == 10054) {
+				//PRINT_SOCKADDR(*((SOCKADDR_IN*)&remote));
+				continue; // Connection reset by peer. We should actually handle this.
+			}
+			DBG_PRINT("RecvThread WSA Error #" << WSAGetLastError());
+			break; // error...
+		}
+
+		if( (*buff) & COMPRESSED ) {
+
+			memcpy(compressed_buff, buff+1, recv-1);
+			recv = compress.Decompress(compressed_buff, recv - 1, buff + 1, max_packet_size - 1);	
+			if (recv == -1)	
+				continue; // If the packet is too big for our buffer, just ignore it.
+			recv++;	// account for flag char at start...
+		}
+		
+		packet = PacketEncoder::DecodePacket(buff, 1);
+
+		// Assemble datagram
 		Datagram dat;
 		SOCKADDR_IN *sock = new SOCKADDR_IN( *((SOCKADDR_IN*)&remote));
+		dat.flags = *buff; // First byte is flag byte.
 		dat.sock = sock;
 		dat.pack = packet;
-
+		
+		// Stick the datagram into the buffer
 		recv_buffer.Lock();
 		recv_buffer->push(dat);
 		recv_buffer.Pulse();
 		recv_buffer.Unlock();
-		//delete output;
+
 	}
+
+	delete [] buff;
+	delete [] compressed_buff;
 	return 0; 
 }
 
 int Peer::sendThread(void) {
-	send_buffer.Lock();
-	compression dd;
+	// Initializing variables outside of the loop for efficiency.
+	Compression compress;
+	char* buff = new char[max_packet_size];
+	char* uncompressed_buff = new char[max_packet_size]; // this is only used when compressing.
+	Datagram data;
+	
 	while (true) {
+		// Grab a packet off the send buffer
+		send_buffer.Lock();	
 		send_buffer.Wait();
-
-		Datagram data = send_buffer->front();
+		data = send_buffer->front();
 		send_buffer->pop();
 		send_buffer.Unlock();
+		
+		// Decode packet
+		buff[0] = data.flags;
+		int size = PacketEncoder::EncodePacket( data.pack, buff, max_packet_size, 1 );
 
-		char buffer[1024];
+		// Run compression & security, if required.
+		if (data.flags & COMPRESSED) { 
+			memcpy(uncompressed_buff,buff,size);
 
-		int size = PacketEncoder::EncodePacket( data.pack, buffer, 1024 );
-
-		//char *output=new char[1024];
-		//int outputsize=1024;
-		//int length;
-		//char* ptr=buffer;
-		////add compression
-		//length=dd.comp(buffer,size,output,outputsize);
-		//if (length==-1)	//output is not enough
-		//{
-		//	delete output;
-		//	output= new char[outputsize];
-		//	length=dd.comp(buffer,size,output,outputsize);
-		//}
-		//if(length<size)	//worth compress
-		//{
-		//	length++;
-		//	memcpy(output+1,output,length);
-		//	*output=1;
-		//}
-		//else			//don't compress
-		//{
-		//	*output=0;
-		//	length=size+1;
-		//	if(length>1024) length=1024;
-		//	memcpy(output+1,ptr,length);
-		//	
-		//}
-		//finish	
-		sendto(this->socketID, buffer, size, 0, (SOCKADDR *)data.sock, sizeof(SOCKADDR));
-		send_buffer.Lock();
-		//delete output;
+			size = compress.Compress(uncompressed_buff+1, size - 1, buff, max_packet_size);
+			if (size==-1) // too big.
+				continue;	// so ignore.
+			size++; // account for the char flag at the start.
+		}
+			
+		// Send it
+		sendto(this->socketID, buff, size, 0, (SOCKADDR *)data.sock, sizeof(SOCKADDR));	
 	}
 
+	delete [] buff;
+	delete [] uncompressed_buff;
 	return 0;
 }
 
@@ -369,9 +355,9 @@ int Peer::logcThread(void) {
 
 		for (it = connections.begin(); it != connections.end();) {
 			if (!it->second->Update()) 
-				connections.erase(it++);
-			else
-				it++;
+				connections.erase(it++);	// Post increment is required here to prevent errors, don't change.
+			else							// ...
+				it++;						// just don't do it.
 		}
 		pacing.WaitTillFinished();
 	}

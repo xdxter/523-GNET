@@ -4,78 +4,90 @@
 using namespace GNET;
 
 
-void ReliableTracker::Update()
+void ReliableUdp::Update()
 {
-	for (it = out.begin(); it != out.end(); it++) {
+	for (it = out_list.begin(); it != out_list.end(); it++) {
 		if(it->second->timer.Finished()) {
-			printf("RUDP------>Resending Packet...\n");
+			DBG_PRINT("[RUDP] --> Resending Packet with seqID = " << it->first);
 			peer->Send(it->second->dat);
 			it->second->timer.Reset(RUDP_TIMEOUT);
 		}
 	}
 }
 
-void ReliableTracker::AddOutgoingPack(DataPack * pack, SOCKADDR_IN * remote)
+bool ReliableUdp::SendingPacket(Datagram * dgram)
 {
-	//printf("RUDP------>Adding reliable datapack with seq ID = %d.\n", pack->seq_num);
-	Datagram * dat = new Datagram;
-	INetPacket* net = static_cast<INetPacket*>(g_NetPackets[ pack->GetType() ].instantiate());
-	memcpy(net,pack, g_NetPackets[pack->GetType()].size);
-	dat->pack = net;
-	dat->sock = new SOCKADDR_IN(*remote);
+	// If this is a datapacket, which should be reliable...
+	if (dgram->flags & RELIABLE && dgram->pack->GetType() != DATA_PACKET) {	
+		// Store this Datagram
+		RudpItem * item = new RudpItem;
+		item->dat = new Datagram(*dgram);
+		item->timer.Reset(RUDP_TIMEOUT);
+		out_list.insert( 
+			ReliableTablePair( 
+				static_cast<DataPack*>(dgram->pack)->seq_num, 
+				item  ));		
+	}
 
-	RudpItem * item = new RudpItem;
-	item->dat = dat;
-	item->timer.Reset(RUDP_TIMEOUT);
-	out[pack->seq_num] = item;
+	return true; // I'll allow it.
 }
 
-bool ReliableTracker::HandlePacket(Datagram * dat)
+void ReliableUdp::SendAckPack(SOCKADDR_IN* sock, unsigned int seq_num) {
+	Datagram *dgram = new Datagram;
+	dgram->flags = RELIABLE;
+	dgram->pack = new RudpAckPack;
+	static_cast<RudpAckPack*>(dgram->pack)->seq_num = seq_num;
+	dgram->sock = new SOCKADDR_IN( *sock );
+	peer->Send(dgram);
+}
+
+bool ReliableUdp::HandlePacket(Datagram * dgram)
 {
-	DataPack* data = dynamic_cast<DataPack*>(dat->pack);
-	if (data && (data->flags & RELIABLE))
-	{
-		//printf("RUDP------>Received a reliable datapack with seq ID = %d from port %d\n", dynamic_cast<DataPack*>(dat->pack)->seq_num,ntohs(dat->sock->sin_port));
-		pRemote(*dat->sock);
-		printf("Rudp datapacket with seqID = %d.\n", dynamic_cast<DataPack*>(dat->pack)->seq_num);
-		it = in.find(dynamic_cast<DataPack*>(dat->pack)->seq_num);
+	if (dgram->flags & RELIABLE) {
+		switch (dgram->pack->GetType()) {
+			case DATA_PACKET:
+				{
+					DataPack *data = static_cast<DataPack*>(dgram->pack);					
+					DBG_PRINT("[RUDP] " << SOCK_PRNT(*dgram->sock) << " --> Datapacket received with seqID = " << dynamic_cast<DataPack*>(dgram->pack)->seq_num);
 
-		//A repetitive datapack or it hasn't been 1 min since this ID is used
-		if (it != in.end())	
-		{
-			//resend Ack packet
-			RudpAckPack ackPack;
-			ackPack.seq_num = dynamic_cast<DataPack*>(dat->pack)->seq_num;
-			peer->Send(&ackPack, dat->sock);
-			printf("RUDP------>Received repetitive packet, decide to abandon.....\n");
-			return true;	//return says this packet has been handled
-		}
-		// new rudp packet
-		else			
-		{
-			RudpItem * item = new RudpItem;
-			item->timer.Reset(RUDP_ID_RESERVATION_TIMEOUT);
+					it = in_list.find( data->seq_num );
+					
+					if (it == in_list.end()) // Received a new Data Packet
+					{
+						RudpItem * item = new RudpItem;
+						item->timer.Reset(RUDP_ID_RESERVATION_TIMEOUT); // This isn't really a great way to do this... but it works for now.
 
-			RudpAckPack ackPack;
-			ackPack.seq_num = dynamic_cast<DataPack*>(dat->pack)->seq_num;
-			in[ackPack.seq_num] = item;
-			//printf("RUDP------>Sending Rudp Ack for received packet %d......\n", ackPack.seq_num);
-			peer->Send(&ackPack, dat->sock);
-			return false;
+						SendAckPack( dgram->sock, data->seq_num );
+
+						return false; // this packet has not been fully handled.
+
+					} else // Already received this one.
+					{
+						// Resend Ack packet
+						SendAckPack( dgram->sock, data->seq_num );
+
+						DBG_PRINT("[RUDP] --> Received repetitive packet, decide to abandon.");
+
+						return true; // this packet has been handled
+					}
+
+				}
+				break;
+			case RUDP_ACK_PACKET:
+				{
+					RudpAckPack * pack = static_cast<RudpAckPack*>(dgram->pack);
+					it = out_list.find(pack->seq_num);
+					if(it != out_list.end())	//if this ACK is recognized
+					{						
+						DBG_PRINT("[RUDP] " <<  SOCK_PRNT(*dgram->sock) << " --> Rudp Ack for packet "<< pack->seq_num <<", removing from the list");
+						out_list.erase(it);
+					}
+					return true;
+
+				}
+				break;			
 		}
 	}
-	else if(dynamic_cast<RudpAckPack*>(dat->pack))
-	{
-		RudpAckPack * pack = dynamic_cast<RudpAckPack*>(dat->pack);
-		it = out.find(pack->seq_num);
-		if(it != out.end())	//if this ACK is recognized
-		{
-			pRemote(*dat->sock);
-			printf("Rudp Ack for packet %d, removing from the list\n", pack->seq_num);
-			out.erase(it);
-		}
-		return true;
-	}
-	else
-		return false;
+
+	return false; // packet has not been handled
 }

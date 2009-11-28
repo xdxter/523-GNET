@@ -19,14 +19,14 @@ using namespace GNET;
 		switch (data->pack->GetType()) {
 			case MARCO_PACKET:
 				{
-					dd("Received Marco Packet");
+					DBG_PRINT("Received Marco Packet");
 					PoloPack pack;
 					peer->Send(&pack, &(connection->remote), false);
 					return true;
 				}
 			case POLO_PACKET:
 				{	
-					dd("Received Polo Packet");
+					DBG_PRINT("Received Polo Packet");
 					// We don't need to do anything here because
 					// Reset should have already been called by our 
 					// Connection
@@ -38,7 +38,7 @@ using namespace GNET;
 
 	void Heartbeat::Update() {
 		if (timer.Finished()) {	
-			dd("Sending Marco Packet");
+			DBG_PRINT("Sending Marco Packet");
 			if (pinging) {
 				if (attempts++ > max_attempts)
 					connection->Disconnect();

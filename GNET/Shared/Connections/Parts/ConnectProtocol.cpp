@@ -34,14 +34,14 @@ namespace GNET {
 		this->attempts = max_attempts;
 		this->ms_delay = ms_delay;
 
-		dd("Trying to Connect");
+		DBG_PRINT("Trying to Connect");
 	}
 
 	bool ConnectProtocol::HandlePacket(Datagram *data) {
 		switch (data->pack->GetType()) {
 			case CON_PACKET:
 				{
-					dd("Received Connect Packet");
+					DBG_PRINT("Received Connect Packet");
 					if (!is_instigator) {
 						Handshake(SEND_SYN);
 						if (state == NOT_CONNECTED)
@@ -51,7 +51,7 @@ namespace GNET {
 				}
 			case SYN_PACKET:
 				{
-					dd("Received Syn Packet");
+					DBG_PRINT("Received Syn Packet");
 					if (is_instigator) {
 						Handshake(SEND_ACK);
 						if (state == WAITING_FOR_SYN) {
@@ -65,7 +65,7 @@ namespace GNET {
 				}
 			case ACK_PACKET:
 				{
-					dd("Received Ack Packet");
+					DBG_PRINT("Received Ack Packet");
 					if (state == WAITING_FOR_ACK)
 						state = CONNECTED;
 					connection->Connect();
